@@ -7,7 +7,7 @@ Learn to design and deploy infrastructure as code, build and monitor CI/CD pipel
 scalable microservices using Kubernetes.
 
 Projects:
-* Deploy static website on AWS
+* [Deploy static website on AWS](https://github.com/jcorrado76/udacity-cloud-devops-engineer/tree/dev/static_website)
 * Deploy a High-Availability (HA) website app on AWS using CloudFormation
 * Create a Jenkins Pipeline on AWS
 * Operationalize a Machine Learning Microserivce API
