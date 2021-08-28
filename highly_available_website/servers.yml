@@ -1,0 +1,166 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Joseph Corrado / Udacity
+
+  This template defines the launch configuration and the load balancing to run 4 web servers, two in each private subnet.
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name to prefix the names of our resources.
+    Type: String
+  WebServerAMI:
+    Description: The AMI to use for the web server
+    Type: String
+
+Resources:
+
+  # the role for an EC2 instance to read from S3
+  EC2ReadOnlyS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+
+  EC2S3ReadOnlyInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref EC2ReadOnlyS3Role
+
+  WebServerLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install unzip awscli -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          aws s3 cp s3://udacity-demo-1/udacity.zip .
+          unzip -o udacity.zip
+      # ubuntu 18 in us west 2
+      ImageId: !Ref WebServerAMI
+      IamInstanceProfile: !Ref EC2S3ReadOnlyInstanceProfile
+      KeyName: udacity-devops-nanodegree
+      SecurityGroups:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-WebServerSecurityGroupID"
+      InstanceType: t3.small
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: '10'
+
+  WebAppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      # this is the port the instances spun up under this target group
+      # will be accessible on - it needs to match what the listener/LB/SG are expecting
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-VPCID"
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      # this is a list of subnet IDs for a VPC where instances in the
+      # autoscaling group can be created
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-Private-Subnets"
+      LaunchConfigurationName: !Ref WebServerLaunchConfiguration
+      # min number of EC2 instances
+      MinSize: '2'
+      # max number of EC2 instances
+      MaxSize: '4'
+      TargetGroupARNs:
+        - Ref: WebAppTargetGroup
+      Tags:
+        - Key: Name
+          Value: Udacity Highly Available Website EC2 Instance
+          # this property is required, or your auto scaling group will fail
+          PropagateAtLaunch: true
+
+  WebServerLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-Public-Subnet-AZ1"
+        - Fn::ImportValue: !Sub "${EnvironmentName}-Public-Subnet-AZ2"
+      SecurityGroups:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-LBSecurityGroupID"
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Application Load Balancer
+
+  WebServerLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WebAppTargetGroup
+      LoadBalancerArn: !Ref WebServerLoadBalancer
+      Port: '80'
+      Protocol: HTTP
+
+  LBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref WebAppTargetGroup
+      Conditions:
+        - Field: path-pattern
+          Values: [ / ]
+      ListenerArn: !Ref WebServerLoadBalancerListener
+      Priority: 1
+
+  WebServerCPUScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 75.0
+
+  WebServerRequestCountPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ALBRequestCountPerTarget
+          ResourceLabel: !Join [ "/", [ !GetAtt WebServerLoadBalancer.LoadBalancerFullName, !GetAtt WebAppTargetGroup.TargetGroupFullName ] ]
+        TargetValue: 3
+
+Outputs:
+  URL:
+    Description: The URL of the website.
+    Value:
+      !Sub
+        - 'http://${DNSName}'
+        - {DNSName: !GetAtt 'WebServerLoadBalancer.DNSName'}
+    Export:
+      Name: !Sub "${EnvironmentName}-SiteURL"
