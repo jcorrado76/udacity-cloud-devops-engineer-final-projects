@@ -31,6 +31,7 @@ To launch the highly available website, simply navigate to the directory, and ru
 make network
 make server
 ```
+# Output
 
-
+You can find the resulting website [here](http://haweb-webse-o3itpmuve7t4-1266692742.us-west-2.elb.amazonaws.com/)
 
