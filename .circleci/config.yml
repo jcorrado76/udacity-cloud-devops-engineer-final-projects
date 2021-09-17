@@ -125,6 +125,10 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - run:
+          name: Install tar utility to use CircleCI workspace
+          command: |
+            yum install tar gzip -y
       - checkout
       - run:
           name: Ensure back-end infrastructure exists
