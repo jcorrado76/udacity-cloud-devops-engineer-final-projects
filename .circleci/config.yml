@@ -177,6 +177,9 @@ jobs:
           command: |
             # install the dependencies needed for your playbook
             apk add --update ansible
+      # we're attaching it at .
+      # but since the path we saved it as on our workspace was .circleci/ansible/inventory.txt
+      # that's where we'll need to retrieve our inventory.txt file from
       - attach_workspace:
           at: .
       - run:
@@ -184,7 +187,6 @@ jobs:
           command: |
             ls -al .
             cat .circleci/ansible/inventory.txt
-            cat inventory.txt
       - run:
           name: Configure server
           command: |
