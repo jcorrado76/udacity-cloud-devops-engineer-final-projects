@@ -1,0 +1,45 @@
+---
+- name: "update apt packages"
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "upgrade apt packages"
+  become: yes
+  apt:
+    upgrade: yes
+
+- name: "Remove unused dependencies"
+  become: yes
+  apt:
+    autoremove: yes
+
+- name: "Install dependencies"
+  become: yes
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "Install pm2"
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: "Create web directory"
+  file:
+    path: ~/web
+    state: directory
+
+- name: "Copy index test page to web directory"
+  template:
+    src: "files/index.js"
+    dest: "~/web/index.js"
+
+- name: "Start web server"
+  shell: |
+    pm2 start ~/web/index.js -f
+
