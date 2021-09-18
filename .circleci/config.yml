@@ -162,7 +162,7 @@ jobs:
             echo $PublicIp >> ./.circleci/ansible/inventory.txt
             cat ./.circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - .circleci/ansible/inventory.txt
 
@@ -174,8 +174,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: [ "a8:64:4c:1a:aa:1f:e1:89:0d:d4:29:80:2e:5a:ab:07" ]
-      # Checkout code from git
-      # Add ssh keys with fingerprint
+
       # attach workspace
       - run:
           name: Install dependencies
