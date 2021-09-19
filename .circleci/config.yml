@@ -65,7 +65,7 @@ jobs:
     steps:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: always
+          when: on_success
   hold:
     executor: aws
     steps:
@@ -73,6 +73,7 @@ jobs:
           name: A dummy hold job
           command: |
             echo 0
+          when: on_success
 
   install-frontend-dependencies:
     executor: node
