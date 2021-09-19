@@ -304,6 +304,9 @@ jobs:
     executor: aws
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: yum install -y tar gzip curl
       - attach_workspace:
           at: .
       - run:
