@@ -301,12 +301,16 @@ jobs:
           when: on_fail
 
   deploy-frontend:
-    executor: aws
+    executor: node
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: yum install -y tar gzip curl
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - attach_workspace:
           at: .
       - run:
@@ -387,21 +391,35 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
 
+  cloudfront-update:
+    executor: aws
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: yum install -y curl
+      - run:
+          name: Grab previous WorkFlow ID and store in memstash
+          working_directory: ./circleci/files
+          command: |
+            WorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text)
+            curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "$WorkflowID" https://api.memstash.io/values/WorkflowID
 
-#  cloudfront-update:
-#    executor: aws
-#    steps:
-#      - checkout
-#      -
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Update cloudfront distribution
-#          command: |
-#            # your code here
-      # Here's where you will add some code to rollback on failure
+      - run:
+          name: Update cloudfront distribution
+          working_directory: ./.circleci/files
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudfront.yml \
+              --stack-name cdn-udacity-proj-stack \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 #
 #cleanup:
 #    docker:
