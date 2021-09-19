@@ -451,8 +451,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
 
-            aws cloudfront list-distributions --no-paginate --output text --query "DistributionList.Items[0].DomainNam
-            e" > URL3.txt
+            aws cloudfront list-distributions --no-paginate --output text --query "DistributionList.Items[0].DomainName" > URL3.txt
 
       - store_artifacts:
           path: URL3.txt
