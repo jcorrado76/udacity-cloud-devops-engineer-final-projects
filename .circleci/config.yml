@@ -105,7 +105,7 @@ jobs:
       - run:
           name: Build frontend
           working_directory: ./frontend
-          command: npm run build
+          command: ls -al && npm run build
       - save_cache:
           paths: [ frontend/node_modules ]
           key: v1-frontend-build-{{ checksum "package-lock.json" }}
