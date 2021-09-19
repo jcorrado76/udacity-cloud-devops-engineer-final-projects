@@ -343,7 +343,7 @@ jobs:
           at: .
       - run:
           name: Install dependencies
-          command: apk add --update ansible
+          command: apk add --update ansible curl
       - run:
           name: Ansible deploy backend server
           working_directory: ./.circleci/ansible
@@ -354,44 +354,51 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
 
-#  smoke-test:
-#    executor: python
-#    steps:
-#      - checkout
-#      - attach_workspace:
-#          at: .
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Get backend url
-#          command: |
-#            # your code here
-#      - run:
-#          name: Backend smoke test.
-#          command: |
-#            # your code here
-#      - run:
-#          name: Frontend smoke test.
-#          command: |
-#            # your code here
+  smoke-test:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl
+            pip install awscli
+      - run:
+          name: Backend smoke test.
+          command: |
+            export BACKEND_URL=$(curl -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request GET https://api.memstash.io/values/BACKEND_URL)
+            curl "$BACKEND_URL/api/status"
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.us-west-2.amazonaws.com/index.html"
+            curl -s ${URL} | grep -q "Welcome"
+
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+
+
+  cloudfront-update:
+    executor: aws
+    steps:
+      - checkout
+      -
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            # your code here
       # Here's where you will add some code to rollback on failure
-#
-#  cloudfront-update:
-#    docker:
-#      # Docker image here that supports AWS CLI
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Update cloudfront distribution
-#          command: |
-#            # your code here
-#      # Here's where you will add some code to rollback on failure
 #
 #cleanup:
 #    docker:
