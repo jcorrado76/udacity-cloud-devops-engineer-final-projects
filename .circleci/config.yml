@@ -350,13 +350,18 @@ jobs:
           at: .
       - run:
           name: Install dependencies
-          command: apk add --update ansible curl
+          command: |
+            apk add --update ansible curl rsync openssh nodejs npm
+            pip install awscli
       - run:
           name: Ansible deploy backend server
           working_directory: ./.circleci/ansible
           command: |
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-server.yml -vv
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
