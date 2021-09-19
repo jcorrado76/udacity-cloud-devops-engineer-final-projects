@@ -64,37 +64,37 @@ jobs:
     executor: node
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build-v1]
       - run:
           name: Install frontend dependencies
           working_directory: ./frontend
           command: ls -al && npm install
+      - save_cache:
+          paths: [ frontend/node_modules ]
+          key: frontend-build-v1
       - persist_to_workspace:
           root: .
           paths:
             - frontend/node_modules
 
-#      - save_cache:
-#          paths: [frontend/node_modules]
-##         needed to add v1 to version the cache so I can invalidate when needed by incrementing version
-#          key: frontend-build-v1
-
   install-backend-dependencies:
     executor: node
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build-v1]
       - run:
           name: Install backend dependencies
           working_directory: ./backend
           command: ls -al && npm install
+      - save_cache:
+          paths: [ backend/node_modules ]
+          key: backend-build-v1
       - persist_to_workspace:
           root: .
           paths:
             - backend/node_modules
-
-  #      - save_cache:
-  #          paths: [backend/node_modules]
-  ##         needed to add v1 to version the cache so I can invalidate when needed by incrementing version
-  #          key: backend-build-v1
 
   build-frontend:
     executor: node
@@ -106,9 +106,6 @@ jobs:
           name: Build frontend
           working_directory: ./frontend
           command: ls -al && npm run build
-      - save_cache:
-          paths: [ frontend/node_modules ]
-          key: v1-frontend-build-{{ checksum "package-lock.json" }}
 
   build-backend:
     executor: node
@@ -120,17 +117,13 @@ jobs:
           name: Build backend
           working_directory: ./backend
           command: npm run build
-      - save_cache:
-          paths: [ backend/node_modules ]
-          key: v1-backend-build-{{ checksum "package-lock.json" }}
-
 
   test-frontend:
     executor: node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-frontend-build-{{ checksum "package-lock.json" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Test frontend code
           working_directory: ./frontend
@@ -146,8 +139,8 @@ jobs:
     executor: node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-backend-build-{{ checksum "package-lock.json" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Test backend code
           working_directory: ./backend
@@ -160,31 +153,29 @@ jobs:
           path: ./backend/test_results
 
   scan-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
-      - restore_cache:
-          keys: [ frontend-build-v1 ]
+      - attach_workspace:
+          at: .
       - run:
           name: Scan frontend code
-          command: |
-            cd frontend
-            npm i
+          working_directory: ./frontend
+          command:
+#            npm i
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
   scan-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
-      - restore_cache:
-          keys: [ backend-build-v1 ]
+      - attach_workspace:
+          at: .
       - run:
           name: Scan backend code
+          working_directory: ./backend
           command: |
-            cd backend
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
   deploy-infrastructure:
@@ -395,10 +386,10 @@ workflows:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
-#      - scan-backend:
-#          requires: [build-backend]
-#      - scan-frontend:
-#          requires: [build-frontend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
 #      - deploy-infrastructure:
 #          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
 #      - configure-infrastructure:
