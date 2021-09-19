@@ -1,0 +1,2 @@
+[prometheus]
+ec2-35-85-47-48.us-west-2.compute.amazonaws.com

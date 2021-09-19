@@ -1,0 +1,61 @@
+---
+- name: "Update apt packages"
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "Upgrade apt packages"
+  become: yes
+  apt:
+    upgrade: yes
+
+- name: "Install docker dependencies"
+  become: yes
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: latest
+    update_cache: yes
+
+- name: "Add docker GPG key"
+  become: yes
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: "Set up stable docker repository"
+  become: yes
+  shell: echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: "update apt packages"
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "Install docker"
+  become: yes
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - python-docker
+    state: latest
+    update_cache: yes
+
+- name: "Copy prometheus configuration file onto prometheus EC2 instance"
+  template:
+    src: "files/prometheus.yml"
+    dest: "~/prometheus.yml"
+
+- name: "Start Prometheus server docker container"
+  become: yes
+  docker_container:
+    name: prometheus-server
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "~/prometheus.yml:/etc/prometheus/prometheus.yml"

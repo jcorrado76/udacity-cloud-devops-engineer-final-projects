@@ -402,19 +402,20 @@ jobs:
           name: Backend smoke test.
           command: |
             export BACKEND_URL=$(curl -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request GET https://api.memstash.io/values/BACKEND_URL)
-            echo $BACKEND_URL
+            echo $BACKEND_URL > URL4.txt
             curl "$BACKEND_URL/api/status"
+      - store_artifacts:
+          path: URL4.txt
+
       - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.us-west-2.amazonaws.com/index.html"
             curl -s ${URL} | grep -q "Welcome"
-            if curl -s ${URL} | grep -q "Welcome" \
-            then \
-              return 1 \
-            else \
-              return 1 \
-            fi
+            echo $URL > URL2.txt
+
+      - store_artifacts:
+          path: URL2.txt
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -449,6 +450,12 @@ jobs:
               --stack-name cdn-udacity-proj-stack \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
+
+            aws cloudfront list-distributions --no-paginate --output text --query "DistributionList.Items[0].DomainNam
+            e" > URL3.txt
+
+      - store_artifacts:
+          path: URL3.txt
 
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
