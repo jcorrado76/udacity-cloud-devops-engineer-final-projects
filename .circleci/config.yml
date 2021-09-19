@@ -60,6 +60,13 @@ commands:
           when: << parameters.when >>
 
 jobs:
+  destroy-frontend-backend-stacks:
+    executor: aws
+    steps:
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_success
+
   install-frontend-dependencies:
     executor: node
     steps:
@@ -228,31 +235,32 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
   configure-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
+    executor: python
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: [ "a8:64:4c:1a:aa:1f:e1:89:0d:d4:29:80:2e:5a:ab:07" ]
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           command: |
             # install the dependencies needed for your playbook
             apk add --update ansible
-      # we're attaching it at .
+      # we're attaching workspace at .
       # but since the path we saved it as on our workspace was .circleci/ansible/inventory.txt
       # that's where we'll need to retrieve our inventory.txt file from
-      - attach_workspace:
-          at: .
-      - run:
-          name: Print inventory contents
-          command: |
-            ls -al .
-            cat .circleci/ansible/inventory.txt
       - run:
           name: Configure server
+          working_directory: ./.circleci/ansible
           command: |
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            pwd
+            ls -al
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
   run-migrations:
     docker:
@@ -397,8 +405,8 @@ workflows:
           requires: [build-frontend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
 #      - run-migrations:
 #          requires: [configure-infrastructure]
 #      - deploy-frontend:
@@ -411,3 +419,6 @@ workflows:
 #          requires: [smoke-test]
 #      - cleanup:
 #          requires: [cloudfront-update]
+      - destroy-frontend-backend-stacks:
+          requires: [deploy-infrastructure]
+          type: approval
