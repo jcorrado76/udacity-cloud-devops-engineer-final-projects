@@ -139,6 +139,10 @@ jobs:
           name: Build backend
           working_directory: ./backend
           command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/dist
 
   test-frontend:
     executor: node
@@ -498,7 +502,7 @@ workflows:
       - cleanup:
           requires: [cloudfront-update]
       - hold:
-          requires: [deploy-infrastructure]
+          requires: [deploy-backend, deploy-frontend]
           type: approval
       - destroy-frontend-backend-stacks:
           requires: [hold]
