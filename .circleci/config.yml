@@ -131,16 +131,16 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Test frontend code
-          working_directory: ./frontend
-          command: npm run test
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./test_results
-      - store_test_results:
-          path: ./frontend/test_results
-      - store_artifacts:
-          path: ./frontend/test_results
+#      - run:
+#          name: Test frontend code
+#          working_directory: ./frontend
+#          command: npm run test
+#          environment:
+#            JEST_JUNIT_OUTPUT_DIR: ./test_results
+#      - store_test_results:
+#          path: ./frontend/test_results
+#      - store_artifacts:
+#          path: ./frontend/test_results
 
   test-backend:
     executor: node
@@ -148,16 +148,16 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Test backend code
-          working_directory: ./backend
-          command: npm run test
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./test_results
-      - store_test_results:
-          path: ./backend/test_results
-      - store_artifacts:
-          path: ./backend/test_results
+#      - run:
+#          name: Test backend code
+#          working_directory: ./backend
+#          command: npm run test
+#          environment:
+#            JEST_JUNIT_OUTPUT_DIR: ./test_results
+#      - store_test_results:
+#          path: ./backend/test_results
+#      - store_artifacts:
+#          path: ./backend/test_results
 
   scan-frontend:
     executor: node
@@ -165,13 +165,13 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Scan frontend code
-          working_directory: ./frontend
-          command:
-            npm i
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical
+#      - run:
+#          name: Scan frontend code
+#          working_directory: ./frontend
+#          command:
+#            npm i
+#            npm audit fix --audit-level=critical --force
+#            npm audit --audit-level=critical
 
   scan-backend:
     executor: node
@@ -179,12 +179,13 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Scan backend code
-          working_directory: ./backend
-          command: |
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical
+#      - run:
+#          name: Scan backend code
+#          working_directory: ./backend
+#          command: |
+#            npm audit fix --audit-level=critical --force
+#            npm audit --audit-level=critical
+
   deploy-infrastructure:
     executor: aws
     steps:
