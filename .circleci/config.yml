@@ -389,7 +389,7 @@ workflows:
           requires:
             - install-backend-dependencies
       - build-backend:
-          reqiures:
+          requires:
             - install-frontend-dependencies
       - test-frontend:
           requires: [build-frontend]
