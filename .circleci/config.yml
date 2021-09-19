@@ -147,7 +147,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [ v1-backend-build-{{ checksum "package-lock.json" }} ]
+          key: v1-backend-build-{{ checksum "package-lock.json" }}
       - run:
           name: Test backend code
           working_directory: ./backend
