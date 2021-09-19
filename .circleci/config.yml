@@ -65,7 +65,7 @@ jobs:
     steps:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_success
+          when: always
 
   install-frontend-dependencies:
     executor: node
