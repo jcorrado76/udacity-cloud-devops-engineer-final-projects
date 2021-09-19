@@ -235,6 +235,7 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
+
   configure-infrastructure:
     executor: python
     steps:
@@ -264,51 +265,52 @@ jobs:
           when: on_fail
 
   run-migrations:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run:
           name: Run migrations
-          command: |
-            cd backend
-            npm run migrations > migration_status
+          working_directory: ./backend
+          command: npm run migrations > migration_status
       - run:
           name: Send migration results to memstash
           command: |
             if grep -q "has been executed successfully" migration_status
             then
               echo "DB migration was successful, will update memstash..."
-              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID:0:7}
+              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "success" https://api.memstash.io/values/migration_{CIRCLE_WORKFLOW_ID:0:7}
             else
               echo "DB migration failed, please verify setup! Probably the database already exists. Verify setup!"
-              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID:0:7}
+              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "failure" https://api.memstash.io/values/migration_{CIRCLE_WORKFLOW_ID:0:7}
             fi
             echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}"
-     # Here's where you will add some code to rollback on failure
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
-#  deploy-frontend:
-#    docker:
-#      # Docker image here that supports AWS CLI
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Get backend url
-#          command: |
-#            # your code here
-#            export API_URL="http://${BACKEND_IP}:3030"
-#            echo "${API_URL}"
-#      - run:
-#          name: Deploy frontend objects
-#          command: |
-#            # your code here
-#      # Here's where you will add some code to rollback on failure
+  deploy-frontend:
+    executor: aws
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure
 #
 #  deploy-backend:
 #    docker:
@@ -408,8 +410,8 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-#      - run-migrations:
-#          requires: [configure-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
 #      - deploy-frontend:
 #          requires: [run-migrations]
 #      - deploy-backend:
@@ -421,5 +423,5 @@ workflows:
 #      - cleanup:
 #          requires: [cloudfront-update]
       - destroy-frontend-backend-stacks:
-          requires: [deploy-infrastructure]
+          requires: [run-migrations]
           type: approval
