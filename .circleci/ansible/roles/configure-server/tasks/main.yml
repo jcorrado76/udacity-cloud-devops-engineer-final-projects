@@ -14,12 +14,23 @@
   apt:
     autoremove: yes
 
-- name: "Install dependencies"
+- name: "Install nodejs and npm"
   become: yes
   apt:
     name: ["nodejs", "npm"]
     state: latest
     update_cache: yes
+
+ - name: "install n"
+    become: yes
+    npm:
+      name: n
+      global: yes
+      production: yes
+
+- name: "install nodejs 13.8.0"
+  become: yes
+  shell: n 13.8.0
 
 - name: "Install pm2"
   become: yes
@@ -28,18 +39,3 @@
     global: yes
     production: yes
     state: present
-
-- name: "Create web directory"
-  file:
-    path: ~/web
-    state: directory
-
-- name: "Copy index test page to web directory"
-  template:
-    src: "files/index.js"
-    dest: "~/web/index.js"
-
-- name: "Start web server"
-  shell: |
-    pm2 start ~/web/index.js -f
-

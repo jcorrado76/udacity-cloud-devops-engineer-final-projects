@@ -1,97 +1,163 @@
 version: 2.1
 
-#commands:
-#  destroy-environment:
-#    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-#    parameters:
-#      # Add parameter here
-#    steps:
-#      - run:
-#          name: Destroy environments
-#          when: on_fail
-#          command: |
-#            # Your code here
-#            exit 1
-#
-#  revert-migrations:
-#    description: Revert the last migration if successfully run in the current workflow.
-#    parameters:
-#      # Add parameter here
-#    steps:
-#      - run:
-#          name: Revert migrations
-#          # Add when this will run
-#          command: |
-#            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-#            SUCCESS = 1
-#            if(( $SUCCESS==1 ));
-#            then
-#            #  cd ~/project/backend
-#            #  npm install
-#            #  Add revert code here. You can find this in the Getting Started section.
-#              exit 1
-#            fi
-#
-jobs:
-  build-frontend:
+executors:
+  node:
     docker:
       - image: circleci/node:13.8.0
+  python:
+    docker:
+      - image: python:3.9.0-alpine
+  aws:
+    docker:
+      - image: amazon/aws-cli
+
+commands:
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      when:
+        type: string
+      id:
+        type: string
+    steps:
+      - run:
+          name: Destroy backend server stack
+          command: |
+            aws cloudformation delete-stack \
+              --stack-name udapeople-backend-<< parameters.id >>
+          environment:
+            TERM: xterm-256color
+          when: << parameters.when >>
+      - run:
+          name: Destroy frontend stack and S3 bucket
+          command: |
+            aws s3 rm s3://udapeople-<< parameters.id >> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.id >>
+          environment:
+            TERM: xterm-256color
+          when: << parameters.when >>
+
+  revert_migrations:
+    description: Revert the last migration if our current workflow successfully executed
+    parameters:
+      when:
+        type: string
+      id:
+        type: string
+    steps:
+      - run:
+          name: Revert migrations
+          working_directory: ./backend
+          command: |
+            SUCCESS=$(curl -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request GET https://api.memstash.io/values/DB_MIGRATION_<< parameters.id >>)
+            echo $SUCCESS
+            if [[ "$SUCCESS" == "success" ]]
+            then
+              pwd
+              ls -la
+              npm run migrations:revert
+            fi
+          when: << parameters.when >>
+
+jobs:
+  install-frontend-dependencies:
+    executor: node
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build-v1]
       - run:
-          name: Build front-end
-          command: |
-            cd frontend
-            npm i
-            npm run build
+          name: Install frontend dependencies
+          working_directory: ./frontend
+          command: ls -al && npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - frontend/node_modules
+
+#      - save_cache:
+#          paths: [frontend/node_modules]
+##         needed to add v1 to version the cache so I can invalidate when needed by incrementing version
+#          key: frontend-build-v1
+
+  install-backend-dependencies:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Install backend dependencies
+          working_directory: ./backend
+          command: ls -al && npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/node_modules
+
+  #      - save_cache:
+  #          paths: [backend/node_modules]
+  ##         needed to add v1 to version the cache so I can invalidate when needed by incrementing version
+  #          key: backend-build-v1
+
+  build-frontend:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build frontend
+          working_directory: ./frontend
+          command: npm run build
       - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-build-v1
+          paths: [ frontend/node_modules ]
+          key: v1-frontend-build-{{ checksum "package-lock.json" }}
 
   build-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build-v1]
+      - attach_workspace:
+          at: .
       - run:
-          name: Back-end build
-          command: |
-            cd backend
-            npm i
-            npm run build
+          name: Build backend
+          working_directory: ./backend
+          command: npm run build
       - save_cache:
-          paths: [backend/node_modules]
-          key: backend-build-v1
+          paths: [ backend/node_modules ]
+          key: v1-backend-build-{{ checksum "package-lock.json" }}
+
 
   test-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build-v1]
+          keys: [ v1-frontend-build-{{ checksum "package-lock.json" }} ]
       - run:
           name: Test frontend code
-          command: |
-            cd frontend
-            npm run test
+          working_directory: ./frontend
+          command: npm run test
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./test_results
+      - store_test_results:
+          path: ./frontend/test_results
+      - store_artifacts:
+          path: ./frontend/test_results
 
   test-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor: node
     steps:
       - checkout
       - restore_cache:
-          keys: [ backend-build-v1 ]
+          keys: [ v1-backend-build-{{ checksum "package-lock.json" }} ]
       - run:
           name: Test backend code
-          command: |
-            cd backend
-            npm run test
+          working_directory: ./backend
+          command: npm run test
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./test_results
+      - store_test_results:
+          path: ./backend/test_results
+      - store_artifacts:
+          path: ./backend/test_results
 
   scan-frontend:
     docker:
@@ -192,24 +258,32 @@ jobs:
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
 
-#
-#  run-migrations:
-#    docker:
-#      # Docker image here that supports NodeJS
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Run migrations
-#          command: |
-#            # Your code here
-#            exit 1
-#      - run:
-#          name: Send migration results to memstash
-#          command: |
-#            # Your code here
-#            exit 1
-#     # Here's where you will add some code to rollback on failure
-#
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm run migrations > migration_status
+      - run:
+          name: Send migration results to memstash
+          command: |
+            if grep -q "has been executed successfully" migration_status
+            then
+              echo "DB migration was successful, will update memstash..."
+              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID:0:7}
+            else
+              echo "DB migration failed, please verify setup! Probably the database already exists. Verify setup!"
+              curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID:0:7}
+            fi
+            echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}"
+     # Here's where you will add some code to rollback on failure
+
 #  deploy-frontend:
 #    docker:
 #      # Docker image here that supports AWS CLI
@@ -309,20 +383,26 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
+      - install-backend-dependencies
+      - install-frontend-dependencies
+      - build-frontend:
+          requires:
+            - install-backend-dependencies
+      - build-backend:
+          reqiures:
+            - install-frontend-dependencies
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
-      - scan-backend:
-          requires: [build-backend]
-      - scan-frontend:
-          requires: [build-frontend]
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+#      - scan-backend:
+#          requires: [build-backend]
+#      - scan-frontend:
+#          requires: [build-frontend]
+#      - deploy-infrastructure:
+#          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
 #      - run-migrations:
 #          requires: [configure-infrastructure]
 #      - deploy-frontend:
