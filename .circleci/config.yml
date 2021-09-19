@@ -66,6 +66,13 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: always
+  hold:
+    executor: aws
+    steps:
+      - run:
+          name: A dummy hold job
+          command: |
+            echo 0
 
   install-frontend-dependencies:
     executor: node
@@ -425,26 +432,26 @@ jobs:
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
-#
-#cleanup:
-#    docker:
-#      # Docker image here
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Get old stack workflow id
-#          command: |
-#            # your code here
-#            export OldWorkflowID="the id here"
-#            export STACKS=[] #put the list of stacks here
-#      - run:
-#          name: Remove old stacks and files
-#          command: |
-#            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-#            then
-#              # your code here
-#            fi
-#
+
+  cleanup:
+    executor: aws
+    steps:
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            export OldWorkflowID=$(curl -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request GET https://api.memstash.io/values/WorkflowID)
+            export CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+
+            if [[ "$CurrentWorkflowID" != "$OldWorkflowID" ]]
+            then
+              echo "Deleting previous stack"
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+            else
+              echo "$OldWorkflowID==$CurrentWorkflowID => nothing needs to be done..."
+            fi
 
 workflows:
   default:
@@ -481,6 +488,8 @@ workflows:
 #          requires: [smoke-test]
 #      - cleanup:
 #          requires: [cloudfront-update]
-      - destroy-frontend-backend-stacks:
-          requires: [run-migrations]
+      - hold:
+          requires: [deploy-infrastructure]
           type: approval
+      - destroy-frontend-backend-stacks:
+          requires: [hold]
