@@ -439,6 +439,7 @@ jobs:
             WorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
               --no-paginate --output text)
+            echo $WorkflowID
             curl -H "Content-Type: text/plain" -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request PUT --data "$WorkflowID" https://api.memstash.io/values/WorkflowID
 
       - run:
@@ -469,6 +470,8 @@ jobs:
           command: |
             export OldWorkflowID=$(curl -H "token: 42e1762c-a623-4f06-925b-fde63ccf6689" --request GET https://api.memstash.io/values/WorkflowID)
             export CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+            echo $OldWorkflowID
+            echo $CurrentWorkflowID
             if [[ "$CurrentWorkflowID" != "$OldWorkflowID" ]]
             then
               echo "Deleting previous stack"
