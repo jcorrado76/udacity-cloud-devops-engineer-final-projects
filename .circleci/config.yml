@@ -86,14 +86,14 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build-v3]
+          keys: [frontend-build-v4]
       - run:
           name: Install frontend dependencies
           working_directory: ./frontend
           command: ls -al && npm install
       - save_cache:
           paths: [ frontend/node_modules ]
-          key: frontend-build-v3
+          key: frontend-build-v4
       - persist_to_workspace:
           root: .
           paths:
@@ -104,14 +104,14 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-v3]
+          keys: [backend-build-v4]
       - run:
           name: Install backend dependencies
           working_directory: ./backend
           command: ls -al && npm install
       - save_cache:
           paths: [ backend/node_modules ]
-          key: backend-build-v3
+          key: backend-build-v4
       - persist_to_workspace:
           root: .
           paths:
