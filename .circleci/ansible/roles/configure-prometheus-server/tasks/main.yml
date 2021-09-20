@@ -42,6 +42,7 @@
       - docker-ce-cli
       - containerd.io
       - python-docker
+      - make
     state: latest
     update_cache: yes
 
