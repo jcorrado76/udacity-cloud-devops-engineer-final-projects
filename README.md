@@ -11,7 +11,7 @@ scalable microservices using Kubernetes.
 Projects:
 * [Deploy static website on AWS](https://github.com/jcorrado76/udacity-cloud-devops-engineer/tree/dev/static_website)
 * [Deploy a High-Availability (HA) website app on AWS using CloudFormation](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/blob/dev/highly_available_website/README.md)
-* Create a Jenkins Pipeline on AWS
+* Give your Application Auto-Deploy Superpowers
 * Operationalize a Machine Learning Microserivce API
 * Capstone Project:
 

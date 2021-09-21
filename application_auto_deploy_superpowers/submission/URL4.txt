@@ -1,0 +1,2 @@
+34.208.108.202
+ec2-34-208-108-202.us-west-2.compute.amazonaws.com
