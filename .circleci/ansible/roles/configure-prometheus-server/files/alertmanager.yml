@@ -1,0 +1,17 @@
+global:
+  # the smarthost and STMP sender used for mail notifications
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'Udacity CI/CD AlertManager'
+  smtp_auth_username: 'josephcorrado7@gmail.com'
+  smtp_auth_password: 'azakfbydfrpxnmaw'
+
+route:
+  group_by: ['alertname']
+  receiver: 'email-me'
+
+
+receivers:
+- name: 'email-me'
+  email_configs:
+  - to: josephcorrado7@gmail.com
+    from: josephcorrado7@gmail.com
