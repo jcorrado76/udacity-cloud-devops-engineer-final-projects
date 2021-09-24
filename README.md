@@ -1,5 +1,4 @@
-<include a CircleCI status badge, here>
-
+[![CircleCI](https://circleci.com/gh/jcorrado76/operationalize_machine_learning_microservice/tree/dev.svg?style=svg)](https://circleci.com/gh/jcorrado76/operationalize_machine_learning_microservice/tree/dev)
 
 ## Introduction
 In this project, we created a docker container that hosted a pre-trained model that allowed us to return house price predictions from a machine learning model. 
@@ -16,36 +15,12 @@ The files in this project are:
 * run_kubernetes.sh - a shell script that lists our kubernetes pods and performs port forwarding between our docker containers in the pods and the host machine
 * upload_docker.sh - a shell script that uploads our docker image to our docker hub
 
+## How to run
+To run the code in this project, you:
+* create a virtual environment, and activate it
+* run `make install` to install the requirements from the `requirements.txt` file
 
-
-
-Your project goal is to operationalize this working, machine learning microservice using [kubernetes](https://kubernetes.io/), which is an open-source system for automating the management of containerized applications. In this project you will:
-* Test your project code using linting
-* Complete a Dockerfile to containerize this application
-* Deploy your containerized application using Docker and make a prediction
-* Improve the log statements in the source code for this application
-* Configure Kubernetes and create a Kubernetes cluster
-* Deploy a container using Kubernetes and make a prediction
-* Upload a complete Github repo with CircleCI to indicate that your code has been tested
-
-You can find a detailed [project rubric, here](https://review.udacity.com/#!/rubrics/2576/view).
-
----
-
-## Setup the Environment
-
-* Create a virtualenv and activate it
-* Run `make install` to install the necessary dependencies
-
-### Running `app.py`
-
+Then, you can run the application in one of three ways:
 1. Standalone:  `python app.py`
 2. Run in Docker:  `./run_docker.sh`
 3. Run in Kubernetes:  `./run_kubernetes.sh`
-
-### Kubernetes Steps
-
-* Setup and Configure Docker locally
-* Setup and Configure Kubernetes locally
-* Create Flask app in Container
-* Run via kubectl
