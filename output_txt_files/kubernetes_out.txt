@@ -1,0 +1,6 @@
+Error from server (AlreadyExists): pods "ml-microservice" already exists
+NAME              READY   STATUS    RESTARTS   AGE
+ml-microservice   1/1     Running   0          3m41s
+Forwarding from 127.0.0.1:81 -> 81
+Forwarding from [::1]:81 -> 81
+Handling connection for 81
