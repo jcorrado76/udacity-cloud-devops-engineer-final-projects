@@ -14,6 +14,10 @@ The files in this project are:
 * run_docker.sh - a shell script that builds the image, then runs a container from that image
 * run_kubernetes.sh - a shell script that lists our kubernetes pods and performs port forwarding between our docker containers in the pods and the host machine
 * upload_docker.sh - a shell script that uploads our docker image to our docker hub
+* output_txt_files: - the console output of running the docker and kubernetes containers, and making calls to the API
+		* docker_out.txt - the output of running `run_docker.sh`
+		* kubernetes_out.txt - the output of running `run_kubernetes.sh`
+		* kubernetes_make_prediction_out.txt - the output of running make_prediction.sh while running kubernetes
 
 ## How to run
 To run the code in this project, you:
