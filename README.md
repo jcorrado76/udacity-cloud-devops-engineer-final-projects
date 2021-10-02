@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Udacity Cloud DevOps Engineer
 ***
 ## [Cloud DevOps Engineer Nanodegree Program](https://www.udacity.com/course/cloud-dev-ops-nanodegree--nd9991)
@@ -17,3 +18,11 @@ Projects:
 
 Certificate:
 * 
+=======
+## Cloud DevOps Capstone Project
+In this project, we'll develop a web application that will be deployed onto a kubernetes cluster of our choosing, and integrated with a CI/CD server.
+Finally, we'll make use of docker format containers by uploading our images to DockerHub.
+
+The web app for this project so far is just a simple toy dash plotly dashboard. 
+
+>>>>>>> 38c5233 (Initial commit)
