@@ -1,7 +1,16 @@
 
 ##### ACTIVATE VIRTUAL ENV
 setup:
-	python -m venv .devops && source .devops/bin/activate
+	python -m venv .devops && /bin/bash source .devops/bin/activate
+
+#### Create EKS Cluster
+k8s:
+	aws cloudformation create-stack \
+		--stack-name kubernetes-cluster \
+		--template-body file://cloudformation_scripts/kubernetes_cluster.yml \
+		--parameters file://cloudformation_scripts/kubernetes_cluster.json \
+		--capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
+		--region=us-west-2
 
 
 ##### PIP INSTALL DEPENDENCIES
