@@ -24,5 +24,7 @@ In this project, we'll develop a web application that will be deployed onto a ku
 Finally, we'll make use of docker format containers by uploading our images to DockerHub.
 
 The web app for this project so far is just a simple toy dash plotly dashboard. 
+## The Repository
+The GitHub repository for this codebase can be found [here](https://github.com/jcorrado76/udacity-cloud-devops-capstone)
 
 >>>>>>> 38c5233 (Initial commit)
