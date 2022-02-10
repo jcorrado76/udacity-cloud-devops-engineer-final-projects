@@ -1,8 +1,16 @@
 version: 2
-jobs:
-  build:
+
+executors:
+  python:
     docker:
       - image: python:3.7.3-stretch
+  aws:
+    docker:
+      - image: amazon/aws-cli
+
+jobs:
+  lint_application:
+    executor: python
     steps:
       - checkout
       - restore_cache:
@@ -12,9 +20,10 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            make setup
+            # we actually don't need the setup step to run in CI/CD since it's already running in a Docker container
+            # make setup
             make install
-            make install hadolint
+            make install_hadolint
 
       - save_cache:
           paths:
@@ -25,3 +34,56 @@ jobs:
           name: run lint
           command: |
             make lint
+
+  build_and_upload_docker_image:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/app.tar | true
+      - run:
+          name: Build application Docker image
+          command: |
+            make docker_image
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/app.tar app
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/app.tar
+      - deploy:
+          name: Push Docker Image to DockerHub
+          command: |
+
+
+  deploy_kubernetes_cluster:
+
+
+workflows:
+  default:
+    jobs:
+      - lint_application:
+          branches:
+            only:
+              - dev
+      - build_and_upload_docker_image:
+          branches:
+            only:
+              - dev
+      - deploy_kubernetes_cluster:
+          branches:
+            only:
+              - prod
