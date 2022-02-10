@@ -1,0 +1,80 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This is the CloudFormation template to spin up an AWS EKS cluster'
+
+Parameters:
+  EnvironmentName:
+    Description: The environment name we'll use for the resources in this project
+    Type: String
+  DefaultVpcId:
+    Description: The VPC ID for our default VPC
+    Type: String
+
+Resources:
+  ClusterInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: "The role that will be attached to the instances in the EKS cluster via the InstanceProfile"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      RoleName: !Sub "${EnvironmentName}-EKS-CLUSTER-IAM-ROLE"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+
+
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref ClusterInstanceRole
+
+  ClusterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EKS Cluster security group
+      GroupName: !Sub "${EnvironmentName}-EKS-CLUSTER-SG"
+      VpcId: !Ref DefaultVpcId
+      Tags:
+        - Key: !Sub "kubernetes.io/cluster/${EnvironmentName}-EKS-CLUSTER"
+          Value: 'owned'
+        - Key: "Name"
+          Value: !Sub "${EnvironmentName}-EKS-CLUSTER-SG"
+
+  Cluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref ClusterSecurityGroup
+        # hard coded subnet ids from default VPC
+        SubnetIds:
+          - subnet-42ae6608
+          - subnet-935160b8
+          - subnet-8664cbfe
+          - subnet-8cf940d1
+      RoleArn: !GetAtt ClusterInstanceRole.Arn
+
+Outputs:
+  ClusterSecurityGroup:
+    Description: The control plane security group
+    Value: !Ref ClusterSecurityGroup
+    Export:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER-SG"
+
+  Cluster:
+    Description: Cluster Name
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"

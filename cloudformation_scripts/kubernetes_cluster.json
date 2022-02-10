@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "EnvironmentName",
+    "ParameterValue": "Udacity-Cloud-Devops-Capstone"
+  },
+  {
+    "ParameterKey": "DefaultVpcId",
+    "ParameterValue": "vpc-71a7f509"
+  }
+]
