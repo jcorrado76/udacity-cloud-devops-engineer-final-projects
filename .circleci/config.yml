@@ -69,7 +69,7 @@ jobs:
           command: |
 
 
-  deploy_kubernetes_cluster:
+#  deploy_kubernetes_cluster:
 
 
 workflows:
@@ -79,11 +79,11 @@ workflows:
           branches:
             only:
               - dev
-      - build_and_upload_docker_image:
-          branches:
-            only:
-              - dev
-      - deploy_kubernetes_cluster:
-          branches:
-            only:
-              - prod
+#      - build_and_upload_docker_image:
+#          branches:
+#            only:
+#              - dev
+#      - deploy_kubernetes_cluster:
+#          branches:
+#            only:
+#              - prod
