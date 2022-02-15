@@ -35,6 +35,10 @@ DOCKER_IMAGE=udacity-cloud-devops-webapp
 docker_image:
 	docker build -t $(DOCKER_IMAGE):latest .
 
+push_image:
+	docker push jcorrado76/$(DOCKER_IMAGE):latest
+
+
 ##### RUN DOCKER IMAGE
 DOCKER_CONTAINER_NAME=udacity-devops-capstone-webapp
 DOCKER_PORT=8050
