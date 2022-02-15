@@ -39,6 +39,8 @@ jobs:
             make lint
 
   build_and_upload_docker_image:
+    environment:
+      DOCKER_IMAGE: udacity-cloud-devops-webapp
     executor: docker
     steps:
       - checkout
@@ -54,13 +56,9 @@ jobs:
             set +o pipefail
             docker load -i /caches/app.tar | true
       - run:
-          name: Install make
-          command: |
-            apk add make
-      - run:
           name: Build application Docker image
           command: |
-            make docker_image
+             docker build -t $(DOCKER_IMAGE):latest .
       - run:
           name: Save Docker image layer cache
           command: |
@@ -73,7 +71,7 @@ jobs:
       - deploy:
           name: Push Docker Image to DockerHub
           command: |
-            make push_image
+            docker push jcorrado76/$(DOCKER_IMAGE):latest
 
 
 #  deploy_kubernetes_cluster:
