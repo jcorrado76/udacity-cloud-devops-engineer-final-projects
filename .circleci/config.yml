@@ -54,6 +54,10 @@ jobs:
             set +o pipefail
             docker load -i /caches/app.tar | true
       - run:
+          name: Install make
+          command: |
+            sudo yum install -y make
+      - run:
           name: Build application Docker image
           command: |
             make docker_image
@@ -84,6 +88,7 @@ workflows:
               only:
                 - dev
       - build_and_upload_docker_image:
+          requires: [lint_application]
           filters:
             branches:
               only:
