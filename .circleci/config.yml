@@ -9,8 +9,18 @@ executors:
   aws:
     docker:
       - image: amazon/aws-cli
+  hadolint:
+    docker:
+      - image: hadolint/hadolint:2.2.0-debian
 
 jobs:
+  lint_docker_container:
+    executor: hadolint
+    steps:
+      - docker/hadolint:
+          dockerfiles: Dockerfile
+          executor-class: small
+
   lint_application:
     executor: python
     steps:
@@ -77,18 +87,24 @@ jobs:
 workflows:
   default:
     jobs:
-#      - docker/hadolint:
-#          dockerfiles: Dockerfile
-#          executor-class: medium
-#          hadolint-tag: 2.2.0-debian
-      - docker/publish:
-          deploy: false
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+      - lint_docker_container:
+          filters:
+            branches:
+              only:
+                - dev
 #      - lint_application:
 #          filters:
 #            branches:
 #              only:
 #                - dev
+#      - docker/hadolint:
+#          dockerfiles: Dockerfile
+#          executor-class: medium
+#          hadolint-tag: 2.2.0-debian
+#      - docker/publish:
+#          deploy: false
+#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+
 #      - build_and_upload_docker_image:
 #          requires: [lint_application]
 #          filters:
