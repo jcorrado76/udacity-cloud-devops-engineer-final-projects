@@ -25,10 +25,11 @@ jobs:
     executor: docker/machine
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - docker/build:
           dockerfile: Dockerfile
           docker-context: .
-          remote-docker-dlc: true
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
   #      - docker/publish:
   #          deploy: false
