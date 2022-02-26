@@ -80,17 +80,17 @@ jobs:
 workflows:
   default:
     jobs:
-#      - lint_application:
-#          filters:
-#            branches:
-#              only:
-#                - dev
-      - build_and_upload_docker_image:
-#          requires: [lint_application]
+      - lint_application:
           filters:
             branches:
               only:
                 - dev
+#      - build_and_upload_docker_image:
+#          requires: [lint_application]
+#          filters:
+#            branches:
+#              only:
+#                - dev
 #      - deploy_kubernetes_cluster:
 #          branches:
 #            only:
