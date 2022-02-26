@@ -15,12 +15,6 @@ executors:
 
 
 jobs:
-  lint_dockerfile:
-    - docker/hadolint:
-        dockerfiles: Dockerfile
-        executor-class: medium
-        hadolint-tag: 2.2.0-debian
-
   lint_application:
     executor: python
     steps:
@@ -88,7 +82,10 @@ jobs:
 workflows:
   default:
     jobs:
-      - lint_dockerfile
+      - docker/hadolint:
+          dockerfiles: Dockerfile
+          executor-class: medium
+          hadolint-tag: 2.2.0-debian
 #      - lint_application:
 #          filters:
 #            branches:
