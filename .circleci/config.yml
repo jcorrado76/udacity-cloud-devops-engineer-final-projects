@@ -18,6 +18,7 @@ jobs:
   lint_docker_container:
     executor: hadolint
     steps:
+      - checkout
       - docker/hadolint:
           dockerfiles: Dockerfile
 
