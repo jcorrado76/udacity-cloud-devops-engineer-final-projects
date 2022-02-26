@@ -1,4 +1,6 @@
-version: 2.1
+version: '2.1'
+orbs:
+  docker: circleci/docker@2.0.2
 
 executors:
   python:
@@ -11,7 +13,14 @@ executors:
     docker:
       - image: docker:17.05.0-ce-git
 
+
 jobs:
+  lint_dockerfile:
+    - docker/hadolint:
+        dockerfiles: Dockerfile
+        executor-class: medium
+        hadolint-tag: 2.2.0-debian
+
   lint_application:
     executor: python
     steps:
@@ -76,15 +85,15 @@ jobs:
 
 #  deploy_kubernetes_cluster:
 
-
 workflows:
   default:
     jobs:
-      - lint_application:
-          filters:
-            branches:
-              only:
-                - dev
+      - lint_dockerfile
+#      - lint_application:
+#          filters:
+#            branches:
+#              only:
+#                - dev
 #      - build_and_upload_docker_image:
 #          requires: [lint_application]
 #          filters:

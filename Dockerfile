@@ -2,7 +2,6 @@ FROM python:3.7.3-stretch
 
 WORKDIR /app
 
-
 COPY app.py requirements.txt Makefile /app/
 
 RUN make install
