@@ -21,17 +21,20 @@ jobs:
       - checkout
       - docker/hadolint:
           dockerfiles: Dockerfile
-  build_docker_image:
+  build_and_push_docker_image:
     executor: docker/machine
     steps:
       - checkout
       - docker/build:
           dockerfile: Dockerfile
           docker-context: .
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-#      - docker/publish:
-#          deploy: false
-#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:latest
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
 
   lint_application:
     executor: python
@@ -105,7 +108,7 @@ workflows:
 #              only:
 #                - dev
 #      -
-      - build_docker_image:
+      - build_and_push_docker_image:
           filters:
             branches:
               only:
