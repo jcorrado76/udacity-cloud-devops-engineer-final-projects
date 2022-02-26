@@ -22,7 +22,14 @@ jobs:
       - docker/hadolint:
           dockerfiles: Dockerfile
   build_docker_image:
-
+    executor: docker/machine
+    steps:
+      - checkout
+      - docker/build:
+          dockerfile: Dockerfile
+          docker-context: .
+#          remote-docker-dlc: true
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
   #      - docker/publish:
   #          deploy: false
   #          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
@@ -93,7 +100,12 @@ jobs:
 workflows:
   default:
     jobs:
-      - lint_docker_container:
+#      - lint_docker_container:
+#          filters:
+#            branches:
+#              only:
+#                - dev
+      - build_docker_image:
           filters:
             branches:
               only:
@@ -103,10 +115,6 @@ workflows:
 #            branches:
 #              only:
 #                - dev
-#      - docker/hadolint:
-#          dockerfiles: Dockerfile
-#          executor-class: medium
-#          hadolint-tag: 2.2.0-debian
 #      - docker/publish:
 #          deploy: false
 #          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
