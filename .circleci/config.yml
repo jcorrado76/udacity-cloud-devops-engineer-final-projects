@@ -9,10 +9,6 @@ executors:
   aws:
     docker:
       - image: amazon/aws-cli
-  docker:
-    docker:
-      - image: docker:17.05.0-ce-git
-
 
 jobs:
   lint_application:
@@ -29,7 +25,6 @@ jobs:
             # we actually don't need the setup step to run in CI/CD since it's already running in a Docker container
             # make setup
             make install
-            make install_hadolint
 
       - save_cache:
           paths:
@@ -82,10 +77,13 @@ jobs:
 workflows:
   default:
     jobs:
-      - docker/hadolint:
-          dockerfiles: Dockerfile
-          executor-class: medium
-          hadolint-tag: 2.2.0-debian
+#      - docker/hadolint:
+#          dockerfiles: Dockerfile
+#          executor-class: medium
+#          hadolint-tag: 2.2.0-debian
+      - docker/publish:
+          deploy: false
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 #      - lint_application:
 #          filters:
 #            branches:
