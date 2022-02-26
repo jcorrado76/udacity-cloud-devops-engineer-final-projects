@@ -28,7 +28,7 @@ jobs:
       - docker/build:
           dockerfile: Dockerfile
           docker-context: .
-#          remote-docker-dlc: true
+          remote-docker-dlc: true
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
   #      - docker/publish:
   #          deploy: false
