@@ -22,7 +22,8 @@ jobs:
       - docker/hadolint:
           dockerfiles: Dockerfile
   build_docker_image:
-    executor: docker/machine
+    docker:
+      - image: cimg/python:3.10.2
     steps:
       - checkout
       - setup_remote_docker:
@@ -106,6 +107,7 @@ workflows:
 #            branches:
 #              only:
 #                - dev
+#      -
       - build_docker_image:
           filters:
             branches:
