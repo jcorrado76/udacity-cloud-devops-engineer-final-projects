@@ -22,19 +22,16 @@ jobs:
       - docker/hadolint:
           dockerfiles: Dockerfile
   build_docker_image:
-    docker:
-      - image: cimg/python:3.10.2
+    executor: docker/machine
     steps:
       - checkout
-#      - setup_remote_docker:
-#          docker_layer_caching: true
       - docker/build:
           dockerfile: Dockerfile
           docker-context: .
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-  #      - docker/publish:
-  #          deploy: false
-  #          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+#      - docker/publish:
+#          deploy: false
+#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
   lint_application:
     executor: python
