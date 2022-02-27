@@ -31,7 +31,7 @@ lint:
 	hadolint Dockerfile && pylint $(PYLINT_FLAGS) $(APP_FILES)
 
 ##### BUILD DOCKER IMAGE
-DOCKER_IMAGE=udacity-cloud-devops-webapp
+DOCKER_IMAGE=udacity-cloud-devops-capstone
 docker_image:
 	docker build -t $(DOCKER_IMAGE):latest .
 

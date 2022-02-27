@@ -35,6 +35,9 @@ jobs:
           dockerfile: Dockerfile
           docker-context: .
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+      - run:
+          command: |
+            docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
       - docker/push:
           digest-path: /tmp/digest.txt
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
