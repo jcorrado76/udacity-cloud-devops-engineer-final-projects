@@ -25,6 +25,7 @@ jobs:
     executor: docker/machine
     steps:
       - checkout
+      - setup_remote_docker
       - docker/build:
           dockerfile: Dockerfile
           docker-context: .
