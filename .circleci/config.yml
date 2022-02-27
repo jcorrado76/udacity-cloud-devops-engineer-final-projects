@@ -111,13 +111,13 @@ jobs:
 workflows:
   default:
     jobs:
-#      - lint_docker_container:
-#          filters:
-#            branches:
-#              only:
-#                - dev
-#      -
+      - lint_docker_container:
+          filters:
+            branches:
+              only:
+                - dev
       - build_and_push_docker_image:
+          requires: [lint_docker_container]
           filters:
             branches:
               only:
