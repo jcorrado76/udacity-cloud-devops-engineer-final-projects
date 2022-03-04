@@ -9,12 +9,45 @@ Parameters:
   DefaultVpcId:
     Description: The VPC ID for our default VPC
     Type: String
+  NodeAutoScalingGroupMinSize:
+    Description: The minimum number of nodes to keep in the cluster
+    Type: Number
+  NodeAutoScalingGroupMaxSize:
+    Description: The maximum number of nodes to keep in the cluster
+    Type: Number
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+  ImageAMI:
+    Description: The EC2 AMI to use for the nodes
+    Type: String
+  NodeInstanceType:
+    Description: The EC2 instance type to use for the nodes
+    Type: String
+  PublicSubnet1:
+    Description: The public subnet ID for the first AZ
+    Type: String
+  PublicSubnet2:
+    Description: The public subnet ID for the first AZ
+    Type: String
+  PublicSubnet3:
+    Description: The public subnet ID for the first AZ
+    Type: String
+  PublicSubnet4:
+    Description: The public subnet ID for the first AZ
+    Type: String
+
+Mappings:
+  MaxPodsPerNode:
+    t2.micro:
+      MaxPods: 1
 
 Resources:
-  ClusterInstanceRole:
+  # EKS CLUSTER CONTROL PLANE STUFF =======
+  ClusterRole:
     Type: AWS::IAM::Role
     Properties:
-      Description: "The role that will be attached to the instances in the EKS cluster via the InstanceProfile"
+      Description: This role allows the control plane to manage clusters on my behalf.
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -25,19 +58,11 @@ Resources:
             Action:
               - sts:AssumeRole
       Path: "/"
-      RoleName: !Sub "${EnvironmentName}-EKS-CLUSTER-IAM-ROLE"
+      RoleName: !Sub "${EnvironmentName}-EKS-CONTROL-PLANE-IAM-ROLE"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
         - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
-
-
-  ClusterInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: "/"
-      Roles:
-        - !Ref ClusterInstanceRole
 
   ClusterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -51,30 +76,200 @@ Resources:
         - Key: "Name"
           Value: !Sub "${EnvironmentName}-EKS-CLUSTER-SG"
 
+  ClusterControlPlaneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: This is the SG for the control plane instances for the EKS cluster
+      VpcId: !Ref DefaultVpcId
+
   Cluster:
     Type: AWS::EKS::Cluster
     Properties:
       Name: !Sub "${EnvironmentName}-EKS-CLUSTER"
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - !Ref ClusterSecurityGroup
+          - !Ref ClusterControlPlaneSecurityGroup
         # hard coded subnet ids from default VPC
         SubnetIds:
-          - subnet-42ae6608
-          - subnet-935160b8
-          - subnet-8664cbfe
-          - subnet-8cf940d1
-      RoleArn: !GetAtt ClusterInstanceRole.Arn
+          - !Ref PublicSubnet1
+          - !Ref PublicSubnet2
+          - !Ref PublicSubnet3
+          - !Ref PublicSubnet4
+      RoleArn: !GetAtt ClusterRole.Arn
+
+  # Node group STUFF =========
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+  NodeInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref NodeInstanceRole
+
+  NodeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for all nodes in the cluster
+      VpcId: !Ref DefaultVpcId
+      Tags:
+        - Key: !Sub "kubernetes.io/cluster/${Cluster}"
+          Value: 'owned'
+
+  NodeSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: NodeSecurityGroup
+    Properties:
+      Description: Allow node to communicate with each other
+      GroupId: !Ref NodeSecurityGroup
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      IpProtocol: '-1'
+      FromPort: 0
+      ToPort: 65535
+
+  NodeSecurityGroupFromControlPlaneIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: NodeSecurityGroup
+    Properties:
+      Description: Allow worker Kubelets and pods to receive communication from the cluster control plane
+      GroupId: !Ref NodeSecurityGroup
+      SourceSecurityGroupId: !Ref ClusterControlPlaneSecurityGroup
+      IpProtocol: tcp
+      FromPort: 1025
+      ToPort: 65535
+
+  ControlPlaneEgressToNodeSecurityGroup:
+    Type: AWS::EC2::SecurityGroupEgress
+    DependsOn: NodeSecurityGroup
+    Properties:
+      Description: Allow the cluster control plane to communicate with worker Kubelet and pods
+      GroupId: !Ref ClusterControlPlaneSecurityGroup
+      DestinationSecurityGroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      FromPort: 1025
+      ToPort: 65535
+
+  ClusterControlPlaneSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: NodeSecurityGroup
+    Properties:
+      Description: Allow pods to communicate with the cluster API Server
+      GroupId: !Ref ClusterControlPlaneSecurityGroup
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      ToPort: 443
+      FromPort: 443
+
+  NodeGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: !Ref NodeAutoScalingGroupMaxSize
+      LaunchConfigurationName: !Ref NodeLaunchConfig
+      MinSize: !Ref NodeAutoScalingGroupMinSize
+      MaxSize: !Ref NodeAutoScalingGroupMaxSize
+      VPCZoneIdentifier:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub "${Cluster}-EKS-NodeGroup-Node"
+          PropagateAtLaunch: 'true'
+        - Key: !Sub 'kubernetes.io/cluster/${Cluster}'
+          Value: 'owned'
+          PropagateAtLaunch: 'true'
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: '1'
+        MaxBatchSize: '1'
+
+  NodeLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: 'true'
+      IamInstanceProfile: !Ref NodeInstanceProfile
+      ImageId: !Ref ImageAMI
+      InstanceType: !Ref NodeInstanceType
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref NodeSecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Join: [
+            "",
+            [
+              "#!/bin/bash -xe\n",
+              "CA_CERTIFICATE_DIRECTORY=/etc/kubernetes/pki", "\n",
+              "CA_CERTIFICATE_FILE_PATH=$CA_CERTIFICATE_DIRECTORY/ca.crt", "\n",
+              "MODEL_DIRECTORY_PATH=~/.aws/eks", "\n",
+              "MODEL_FILE_PATH=$MODEL_DIRECTORY_PATH/eks-2017-11-01.normal.json", "\n",
+              "mkdir -p $CA_CERTIFICATE_DIRECTORY", "\n",
+              "mkdir -p $MODEL_DIRECTORY_PATH", "\n",
+              "curl -o $MODEL_FILE_PATH https://s3-us-west-2.amazonaws.com/amazon-eks/1.10.3/2018-06-05/eks-2017-11-01.normal.json", "\n",
+              "aws configure add-model --service-model file://$MODEL_FILE_PATH --service-name eks", "\n",
+              "aws eks describe-cluster --region=", { Ref: "AWS::Region" }," --name=", { Ref: Cluster }," --query 'cluster.{certificateAuthorityData: certificateAuthority.data, endpoint: endpoint}' > /tmp/describe_cluster_result.json", "\n",
+              "cat /tmp/describe_cluster_result.json | grep certificateAuthorityData | awk '{print $2}' | sed 's/[,\"]//g' | base64 -d >  $CA_CERTIFICATE_FILE_PATH", "\n",
+              "MASTER_ENDPOINT=$(cat /tmp/describe_cluster_result.json | grep endpoint | awk '{print $2}' | sed 's/[,\"]//g')", "\n",
+              "INTERNAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)", "\n",
+              "sed -i s,MASTER_ENDPOINT,$MASTER_ENDPOINT,g /var/lib/kubelet/kubeconfig", "\n",
+              "sed -i s,CLUSTER_NAME,", { Ref: Cluster }, ",g /var/lib/kubelet/kubeconfig", "\n",
+              "sed -i s,REGION,", { Ref: "AWS::Region" }, ",g /etc/systemd/system/kubelet.service", "\n",
+              "sed -i s,MAX_PODS,", { "Fn::FindInMap": [ MaxPodsPerNode, { Ref: NodeInstanceType }, MaxPods ] }, ",g /etc/systemd/system/kubelet.service", "\n",
+              "sed -i s,MASTER_ENDPOINT,$MASTER_ENDPOINT,g /etc/systemd/system/kubelet.service", "\n",
+              "sed -i s,INTERNAL_IP,$INTERNAL_IP,g /etc/systemd/system/kubelet.service", "\n",
+              "DNS_CLUSTER_IP=10.100.0.10", "\n",
+              "if [[ $INTERNAL_IP == 10.* ]] ; then DNS_CLUSTER_IP=172.20.0.10; fi", "\n",
+              "sed -i s,DNS_CLUSTER_IP,$DNS_CLUSTER_IP,g  /etc/systemd/system/kubelet.service", "\n",
+              "sed -i s,CERTIFICATE_AUTHORITY_FILE,$CA_CERTIFICATE_FILE_PATH,g /var/lib/kubelet/kubeconfig" , "\n",
+              "sed -i s,CLIENT_CA_FILE,$CA_CERTIFICATE_FILE_PATH,g  /etc/systemd/system/kubelet.service" , "\n",
+              "systemctl daemon-reload", "\n",
+              "systemctl restart kubelet", "\n",
+              "/opt/aws/bin/cfn-signal -e $? ",
+              "         --stack ", { Ref: "AWS::StackName" },
+              "         --resource NodeGroup ",
+              "         --region ", { Ref: "AWS::Region" }, "\n"
+            ]
+          ]
 
 Outputs:
-  ClusterSecurityGroup:
+  ClusterName:
+    Description: Cluster Name
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"
+
+  ClusterArn:
+    Value: !GetAtt Cluster.Arn
+    Description: Cluster Arn
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-ClusterArn"
+
+  ClusterEndpoint:
+    Value: !GetAtt Cluster.Endpoint
+    Description: Cluster Endpoint
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-ClusterEndpoint"
+
+  ClusterControlPlaneSecurityGroup:
     Description: The control plane security group
     Value: !Ref ClusterSecurityGroup
     Export:
       Name: !Sub "${EnvironmentName}-EKS-CLUSTER-SG"
 
-  Cluster:
-    Description: Cluster Name
-    Value: !Ref Cluster
-    Export:
-      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"

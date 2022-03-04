@@ -6,5 +6,42 @@
   {
     "ParameterKey": "DefaultVpcId",
     "ParameterValue": "vpc-71a7f509"
+  },
+  {
+    "ParameterKey": "PublicSubnet1",
+    "ParameterValue": "subnet-42ae6608"
+  },
+  {
+    "ParameterKey": "PublicSubnet2",
+    "ParameterValue": "subnet-935160b8"
+  },
+  {
+    "ParameterKey": "PublicSubnet3",
+    "ParameterValue": "subnet-8664cbfe"
+  },
+  {
+    "ParameterKey": "PublicSubnet4",
+    "ParameterValue": "subnet-8cf940d1"
+  },
+  {
+    "ParameterKey": "NodeAutoScalingGroupMinSize",
+    "ParameterValue": "1"
+  },
+  {
+    "ParameterKey": "NodeAutoScalingGroupMaxSize",
+    "ParameterValue": "2"
+  },
+  {
+    "ParameterKey": "KeyName",
+    "ParameterValue": "macbook-us-west-2"
+  },
+  {
+    "ParameterKey": "ImageAMI",
+    "ParameterValue": "ami-0b9f27b05e1de14e9"
+  },
+  {
+    "ParameterKey": "NodeInstanceType",
+    "ParameterValue": "t2.micro"
   }
+
 ]
