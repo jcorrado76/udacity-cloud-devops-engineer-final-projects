@@ -48,3 +48,20 @@ stop_webapp:
 	docker stop $(DOCKER_CONTAINER_NAME)
 rm_container:
 	docker rm $(DOCKER_CONTAINER_NAME)
+
+CLUSTER_NAME=Udacity-Cloud-Devops-Capstone-EKS-CLUSTER
+cluster:
+	./generic_create_stack_script_iam_capabilities.sh $(CLUSTER_NAME) cloudformation_scripts/kubernetes_cluster.yml cloudformation_scripts/kubernetes_cluster.json
+
+cluster_deploy:
+	kubectl run flask-dash\
+		--image jcorrado76/$(DOCKER_IMAGE):latest\
+		--port=80\
+		--labels app=flask-dash && \
+	kubectl port-forward flask-dash 8050:80
+
+cluster_config:
+	aws eks update-kubeconfig --name $(CLUSTER_NAME)
+
+cluster_test:
+	kubectl get svc
