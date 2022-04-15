@@ -20,11 +20,8 @@ jobs:
     executor: hadolint
     steps:
       - checkout
-      - run:
-          command: |
-            echo $(pwd) && cd flask_app && echo $(pwd)
       - docker/hadolint:
-          dockerfiles: Dockerfile
+          dockerfiles: flask_app/Dockerfile
   build_and_push_docker_image:
     docker:
       - image: cimg/python:3.10.2
