@@ -34,13 +34,13 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
-          dockerfile: Dockerfile
+          dockerfile: flask_app/Dockerfile
           docker-context: .
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
-      - run:
-          command: |
-            docker login -u="${DOCKER_LOGIN}" -p="${DOCKER_PASSWORD}"
+#      - run:
+#          command: |
+#            docker login -u="${DOCKER_LOGIN}" -p="${DOCKER_PASSWORD}"
       - docker/push:
           digest-path: /tmp/digest.txt
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
