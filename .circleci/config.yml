@@ -22,24 +22,25 @@ jobs:
       - checkout
       - docker/hadolint:
           dockerfiles: flask_app/Dockerfile
-#  build_and_push_docker_image:
-#    docker:
-#      - image: cimg/python:3.10.2
-#    steps:
-#      - setup_remote_docker:
-#          docker_layer_caching: true
-#      - checkout
-#      - docker/check
-#      - docker/build:
-#          docker-context: flask_app
-#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-#          tag: latest
-#      - docker/push:
-#          digest-path: /tmp/digest.txt
-#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-#      - run:
-#          command: |
-#            echo "Digest is: $(</tmp/digest.txt)"
+  build_and_push_docker_image:
+    docker:
+      - image: cimg/python:3.10.2
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - docker/check
+      - docker/build:
+          docker-context: flask_app
+          path: flask_app
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+          tag: latest
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
 
   lint_application:
     executor: python
@@ -76,26 +77,25 @@ workflows:
 #            branches:
 #              only:
 #                - dev
-#      - build_and_push_docker_image:
-#          requires: [lint_docker_container]
-#          filters:
-#            branches:
-#              only:
-#                - dev
-      - docker/publish:
-          executor:
-            image: cimg/python:3.10.2
+      - build_and_push_docker_image:
           requires: [lint_docker_container]
           filters:
             branches:
               only:
                 - dev
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: latest
-          docker-context: flask_app
-          path: flask_app
-          remote-docker-dlc: true
-          use-remote-docker: true
+#      - docker/publish:
+#          executor: docker/docker
+#          requires: [lint_docker_container]
+#          filters:
+#            branches:
+#              only:
+#                - dev
+#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+#          tag: latest
+#          docker-context: flask_app
+#          path: flask_app
+#          remote-docker-dlc: true
+#          use-remote-docker: true
 #      - lint_application:
 #          filters:
 #            branches:
