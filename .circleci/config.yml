@@ -22,15 +22,14 @@ jobs:
       - checkout
       - docker/hadolint:
           dockerfiles: flask_app/Dockerfile
-  build_and_push_docker_image:
-    docker:
-      - image: cimg/python:3.10.2
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - docker/check
-
+#  build_and_push_docker_image:
+#    docker:
+#      - image: cimg/python:3.10.2
+#    steps:
+#      - setup_remote_docker:
+#          docker_layer_caching: true
+#      - checkout
+#      - docker/check
 #      - docker/build:
 #          docker-context: flask_app
 #          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
@@ -72,11 +71,11 @@ jobs:
 workflows:
   default:
     jobs:
-      - lint_docker_container:
-          filters:
-            branches:
-              only:
-                - dev
+#      - lint_docker_container:
+#          filters:
+#            branches:
+#              only:
+#                - dev
 #      - build_and_push_docker_image:
 #          requires: [lint_docker_container]
 #          filters:
@@ -84,6 +83,8 @@ workflows:
 #              only:
 #                - dev
       - docker/publish:
+          executor:
+            image: cimg/python:3.10.2
           requires: [lint_docker_container]
           filters:
             branches:
