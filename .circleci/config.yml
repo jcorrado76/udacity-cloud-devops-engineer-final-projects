@@ -31,7 +31,6 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
-          dockerfile: Dockerfile
           docker-context: flask_app
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
