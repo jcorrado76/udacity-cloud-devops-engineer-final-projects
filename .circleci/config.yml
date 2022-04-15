@@ -31,13 +31,17 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
+          # this is what's passed as the build context; this allows me to write
+          # copy requirements.txt or copy app.py without the flask_app/ prefix
           docker-context: flask_app
+          # this is the path to the dockerfile - the argument to -f in docker build
           path: flask_app
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+          tag: latest
       - run:
           command: |
             echo "Digest is: $(</tmp/digest.txt)"
