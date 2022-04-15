@@ -30,10 +30,7 @@ jobs:
           docker_layer_caching: true
       - checkout
       - docker/check
-      - docker/publish:
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: latest
-          docker-context: flask_app
+
 #      - docker/build:
 #          docker-context: flask_app
 #          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
@@ -70,7 +67,7 @@ jobs:
           command: |
             make lint
 
-  deploy_kubernetes_cluster:
+#  deploy_kubernetes_cluster:
 
 workflows:
   default:
@@ -80,12 +77,24 @@ workflows:
             branches:
               only:
                 - dev
-      - build_and_push_docker_image:
+#      - build_and_push_docker_image:
+#          requires: [lint_docker_container]
+#          filters:
+#            branches:
+#              only:
+#                - dev
+      - docker/publish:
           requires: [lint_docker_container]
           filters:
             branches:
               only:
                 - dev
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+          tag: latest
+          docker-context: flask_app
+          path: flask_app
+          remote-docker-dlc: true
+          use-remote-docker: true
 #      - lint_application:
 #          filters:
 #            branches:
