@@ -21,7 +21,8 @@ jobs:
     steps:
       - checkout
       - docker/hadolint:
-          dockerfiles: flask_app/Dockerfile
+          # I've specified flask_app as the working directory in the workflow below
+          dockerfiles: Dockerfile
   build_and_push_docker_image:
     docker:
       - image: cimg/python:3.10.2
@@ -76,17 +77,18 @@ jobs:
 workflows:
   default:
     jobs:
-#      - lint_docker_container:
-#          filters:
-#            branches:
-#              only:
-#                - dev
-      - build_and_push_docker_image:
-#          requires: [lint_docker_container]
+      - lint_docker_container:
           filters:
             branches:
               only:
                 - dev
+          working_directory: flask_app
+#      - build_and_push_docker_image:
+##          requires: [lint_docker_container]
+#          filters:
+#            branches:
+#              only:
+#                - dev
 #      - docker/publish:
 #          executor: docker/docker
 #          requires: [lint_docker_container]
