@@ -2,11 +2,11 @@ FROM python:3.7.3-stretch
 
 WORKDIR /app
 
-COPY flask_app/requirements.txt flask_app/Makefile /app/
+COPY requirements.txt Makefile /app/
 
 RUN make install
 
-COPY flask_app/app.py /app/
+COPY app.py /app/
 
 EXPOSE 8050
 

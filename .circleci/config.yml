@@ -25,22 +25,16 @@ jobs:
   build_and_push_docker_image:
     docker:
       - image: cimg/python:3.10.2
-        auth:
-          username: $DOCKER_LOGIN
-          password: $DOCKER_PASSWORD
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
       - checkout
       - docker/check
       - docker/build:
-          dockerfile: flask_app/Dockerfile
-          docker-context: .
+          dockerfile: Dockerfile
+          docker-context: flask_app
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
-#      - run:
-#          command: |
-#            docker login -u="${DOCKER_LOGIN}" -p="${DOCKER_PASSWORD}"
       - docker/push:
           digest-path: /tmp/digest.txt
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
