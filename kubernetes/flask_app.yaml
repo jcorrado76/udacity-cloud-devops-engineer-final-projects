@@ -33,5 +33,6 @@ spec:
       containers:
       - name: flask-app
         image: jcorrado76/udacity-cloud-devops-capstone:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8050
