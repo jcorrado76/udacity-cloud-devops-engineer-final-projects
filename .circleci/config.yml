@@ -32,7 +32,6 @@ jobs:
       - docker/check
       - docker/build:
           docker-context: flask_app
-          path: flask_app
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
       - docker/push:
