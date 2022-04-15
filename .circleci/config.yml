@@ -30,16 +30,20 @@ jobs:
           docker_layer_caching: true
       - checkout
       - docker/check
-      - docker/build:
-          docker-context: flask_app
+      - docker/publish:
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           tag: latest
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
+          docker-context: flask_app
+#      - docker/build:
+#          docker-context: flask_app
+#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+#          tag: latest
+#      - docker/push:
+#          digest-path: /tmp/digest.txt
+#          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+#      - run:
+#          command: |
+#            echo "Digest is: $(</tmp/digest.txt)"
 
   lint_application:
     executor: python
