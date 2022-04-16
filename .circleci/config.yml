@@ -50,14 +50,13 @@ jobs:
   lint_application:
     executor: python
     steps:
-      - checkout
+      - checkout:
+          path: ~/flask_app
       - restore_cache:
-          working_directory: flask_app
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
             - v1-dependencies-
       - run:
-          working_directory: flask_app
           name: install dependencies
           command: |
             # you need the make setup for caching to work correctly
@@ -65,13 +64,11 @@ jobs:
             make install
 
       - save_cache:
-          working_directory: flask_app
           paths:
             - .devops
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
-          working_directory: flask_app
           name: run lint
           command: |
             make lint
@@ -108,21 +105,21 @@ workflows:
             branches:
               only:
                 - dev
-      - lint_docker_container:
-          filters:
-            branches:
-              only:
-                - dev
-      - build_and_push_docker_image:
-          requires: [lint_docker_container]
-          filters:
-            branches:
-              only:
-                - dev
-      - update_kubernetes_image:
-          requires: [build_and_push_docker_image]
-          cluster-name: udacity-devops-capstone
-          aws-region: us-east-1
-          context: udacity-aws
+#      - lint_docker_container:
+#          filters:
+#            branches:
+#              only:
+#                - dev
+#      - build_and_push_docker_image:
+#          requires: [lint_docker_container]
+#          filters:
+#            branches:
+#              only:
+#                - dev
+#      - update_kubernetes_image:
+#          requires: [build_and_push_docker_image]
+#          cluster-name: udacity-devops-capstone
+#          aws-region: us-east-1
+#          context: udacity-aws
 
 
