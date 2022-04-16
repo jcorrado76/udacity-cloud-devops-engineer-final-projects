@@ -100,6 +100,7 @@ workflows:
     jobs:
       - update_kubernetes_image:
           cluster-name: udacity-devops-capstone
+          context: udacity-aws
 #      - lint_application:
 #          filters:
 #            branches:
