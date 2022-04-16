@@ -51,7 +51,8 @@ jobs:
     executor: python
     working_directory: ~/udacity-cloud-devops-capstone/flask_app
     steps:
-      - checkout
+      - checkout:
+          path: ~/udacity-cloud-devops-capstone
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
