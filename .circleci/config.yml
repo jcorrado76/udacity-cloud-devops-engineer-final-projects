@@ -48,31 +48,34 @@ jobs:
             echo "Digest is: $(</tmp/digest.txt)"
 
   lint_application:
-    executor: python
+    docker:
+      - image: cimg/python:3.10.2
     # you always need the combination of this working directory
     # plus the checkout path
     working_directory: ~/udacity-cloud-devops-capstone/flask_app
     steps:
       - checkout:
           path: ~/udacity-cloud-devops-capstone
+      - run:
+          name: Grant CircleCI access to dependency locations
+          command: |
+            sudo chown -R circleci:circleci /usr/local/bin
+            sudo chown -R circleci:circleci /usr/local/lib
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "Pipfile.lock" }}
             - v1-dependencies-
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
-            # you need the make setup for caching to work correctly
             echo $(pwd) 
             echo $(ls)
-            make setup
-            make install
-
+            sudo pip install pipenv
+            pipenv install
       - save_cache:
           paths:
-            - .devops
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
-
+            - "venv"
+          key: v1-dependencies-{{ checksum "Pipfile.lock" }}
       - run:
           name: run lint
           command: |
