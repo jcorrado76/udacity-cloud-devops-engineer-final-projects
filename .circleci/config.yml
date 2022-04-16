@@ -50,13 +50,14 @@ jobs:
   lint_application:
     executor: python
     steps:
-      - checkout:
-          path: ~/flask_app
+      - checkout
       - restore_cache:
+          working_directory: flask_app
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
             - v1-dependencies-
       - run:
+          working_directory: flask_app
           name: install dependencies
           command: |
             # you need the make setup for caching to work correctly
@@ -64,11 +65,13 @@ jobs:
             make install
 
       - save_cache:
+          working_directory: flask_app
           paths:
             - .devops
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
+          working_directory: flask_app
           name: run lint
           command: |
             make lint
