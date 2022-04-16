@@ -84,6 +84,10 @@ jobs:
         description: |
           The name of the cluster to update.
         type: string
+      aws-region:
+        description: |
+          The AWS region to use.
+        type: string
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
