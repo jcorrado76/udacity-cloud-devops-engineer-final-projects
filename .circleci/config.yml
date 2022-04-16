@@ -70,7 +70,7 @@ jobs:
           command: |
             echo $(pwd) 
             echo $(ls)
-            sudo pip install pipenv
+            pip install pipenv
             pipenv install
       - save_cache:
           paths:
