@@ -92,7 +92,7 @@ jobs:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
-          aws-region: << parameters.region >>
+          aws-region: << parameters.aws-region >>
           install-kubectl: true
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
@@ -105,7 +105,7 @@ workflows:
     jobs:
       - update_kubernetes_image:
           cluster-name: udacity-devops-capstone
-          region: us-east-1
+          aws-region: us-east-1
           context: udacity-aws
 #      - lint_application:
 #          filters:
