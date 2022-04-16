@@ -49,6 +49,8 @@ jobs:
 
   lint_application:
     executor: python
+    # you always need the combination of this working directory
+    # plus the checkout path
     working_directory: ~/udacity-cloud-devops-capstone/flask_app
     steps:
       - checkout:

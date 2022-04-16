@@ -1,7 +1,7 @@
 
 ##### ACTIVATE VIRTUAL ENV
 setup:
-	python -m venv .devops && source .devops/bin/activate
+	python -m venv .devops && /bin/sh source .devops/bin/activate
 
 #### Create EKS Cluster
 k8s:
