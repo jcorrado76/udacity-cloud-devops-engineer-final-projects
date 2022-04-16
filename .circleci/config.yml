@@ -70,6 +70,7 @@ jobs:
           command: |
             echo $(pwd) 
             echo $(ls)
+            echo $(python --version)
             pip install pipenv
             pipenv install
       - save_cache:
