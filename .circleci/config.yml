@@ -61,6 +61,8 @@ jobs:
           name: install dependencies
           command: |
             # you need the make setup for caching to work correctly
+            echo $(pwd) 
+            echo $(ls)
             make setup
             make install
 
