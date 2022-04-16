@@ -98,7 +98,8 @@ jobs:
 workflows:
   default:
     jobs:
-      - update_kubernetes_image
+      - update_kubernetes_image:
+          cluster-name: udacity-devops-capstone
 #      - lint_application:
 #          filters:
 #            branches:
