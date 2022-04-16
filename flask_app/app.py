@@ -4,6 +4,13 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 
+MARKER_COLORS = [
+    "Gold",
+    "MediumTurquoise",
+    "LightGreen",
+    "firebrick"
+]
+
 app = dash.Dash(__name__)
 app.layout = html.Div([
     html.P("Color:"),
@@ -13,13 +20,14 @@ app.layout = html.Div([
             {
                 "label": x,
                 "value": x
-            } for x in ["Gold", "MediumTurquoise", "LightGreen"]
+            } for x in MARKER_COLORS
         ],
         value="Gold",
         clearable=False
     ),
     dcc.Graph(id="graph")
 ])
+
 
 @app.callback(
     Output("graph", "figure"),
