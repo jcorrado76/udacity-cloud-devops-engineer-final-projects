@@ -75,6 +75,7 @@ jobs:
             echo $(python --version)
             pip install pipenv
             pipenv install
+            echo $(ls)
       - save_cache:
           paths:
             - ".venv"
@@ -84,7 +85,7 @@ jobs:
       - run:
           name: run lint
           command: |
-            pipenv run "make lint"
+            pipenv run pylint app.py
 
   update_kubernetes_image:
     docker:
