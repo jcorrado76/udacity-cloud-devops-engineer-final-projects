@@ -85,4 +85,22 @@ Read [this article](https://komodor.com/learn/how-to-fix-errimagepull-and-imagep
 you have an error pulling an image.
 
 They describe how to check which particular error was raised when pulling the image as well. 
+<<<<<<< HEAD
 >>>>>>> f6fcdfd (Added a docker check step to CI/CD. Also updated README to contain steps for how to create EKS cluster)
+=======
+# Pipfile
+In this project, I've kept the Pipfile extremely simple. It's essentially a minimal example of a pipfile that can be used to spin up 
+a dash dashboard, and lint the python application code.
+
+Note that in this project, the dashboard is a single python file. 
+In addition, note that in our pipfile, we've relaxed our python version so that it requires `3.10`, not `3.10.4`.
+When you do it like this, Pipenv will allow any patch of python `3.10` to work.
+# Dockerfile
+First, we're starting off with Python:3.10-slim as our base image. There isn't any particular reason for this base image, 
+and it can probably be optimized to be smaller and have a smaller security surface area.
+
+First, we copy our Pipfile, Pipfile.lock and Makefile into the working directory of our docker image. This will
+allow us to cache the code resulting from copying and installation of dependencies separately from updates made to the application. 
+
+The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes there to be a 
+>>>>>>> 8be3476 (Fixed the Dockerfile to use Pipenv)
