@@ -51,6 +51,8 @@ jobs:
     docker:
       - image: cimg/python:3.10.2
         environment:
+          # this causes a .venv directory to be created in the project directory
+          # we'll do caching inside CircleCI. in the future, you might want to leverage docker's caching.
           PIPENV_VENV_IN_PROJECT: true
     # you always need the combination of this working directory
     # plus the checkout path
@@ -132,10 +134,10 @@ workflows:
             branches:
               only:
                 - dev
-#      - update_kubernetes_image:
-#          requires: [build_and_push_docker_image]
-#          cluster-name: udacity-devops-capstone
-#          aws-region: us-east-1
-#          context: udacity-aws
+      - update_kubernetes_image:
+          requires: [build_and_push_docker_image]
+          cluster-name: udacity-devops-capstone
+          aws-region: us-east-1
+          context: udacity-aws
 
 

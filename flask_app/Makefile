@@ -14,9 +14,8 @@ k8s:
 
 
 ##### PIP INSTALL DEPENDENCIES
-PIP_INSTALL_FLAGS=--no-cache-dir -r
 install:
-	pip install --upgrade pip && pip install $(PIP_INSTALL_FLAGS) requirements.txt
+	pip install --no-cache-dir pipenv==2022.4.8 && pipenv install
 
 ##### DOWNLOAD HADOLINT
 install_hadolint:
