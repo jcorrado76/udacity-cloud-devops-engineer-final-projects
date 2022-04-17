@@ -85,7 +85,7 @@ jobs:
       - run:
           name: run lint
           command: |
-            pipenv run pylint app.py
+            pipenv run make lint
 
   update_kubernetes_image:
     docker:
