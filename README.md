@@ -102,5 +102,16 @@ and it can probably be optimized to be smaller and have a smaller security surfa
 First, we copy our Pipfile, Pipfile.lock and Makefile into the working directory of our docker image. This will
 allow us to cache the code resulting from copying and installation of dependencies separately from updates made to the application. 
 
+<<<<<<< HEAD
 The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes there to be a 
 >>>>>>> 8be3476 (Fixed the Dockerfile to use Pipenv)
+=======
+The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes the virtual environment created by Pipenv to be saved
+in a `.venv` directory inside the project directory, which is what we'll be caching and using.
+
+I suppose in this step, it's actually not necessary, since essentially each layer of the entire docker container is cached, so even if we didn't
+specify this environment variable, we'd still get the caching functionality if our virtual environment were saved into a shared location.
+Note that we need to do it this way when running our tests and whatnot since we're only using the CI/CD caching functionality when running our tests.
+This can probably be remedied by using a dedicated docker container for running our tests, and creating a base image that our testing container
+depends on, and that our final deployed image depends on.
+>>>>>>> e481677 (Consolidated the two run statements into a single one where installing the python dependencies depends on the correct installation of pipenv itself.)

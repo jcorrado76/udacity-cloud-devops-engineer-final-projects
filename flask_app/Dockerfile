@@ -9,9 +9,7 @@ WORKDIR /app
 
 COPY Pipfile Pipfile.lock Makefile /app/
 
-RUN pip install pipenv
-
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install
+RUN pip install pipenv && pipenv install
 
 COPY app.py /app/
 
