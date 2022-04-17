@@ -103,10 +103,14 @@ First, we copy our Pipfile, Pipfile.lock and Makefile into the working directory
 allow us to cache the code resulting from copying and installation of dependencies separately from updates made to the application. 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes there to be a 
 >>>>>>> 8be3476 (Fixed the Dockerfile to use Pipenv)
 =======
 The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes the virtual environment created by Pipenv to be saved
+=======
+Note that we don't need `PIPENV_VENV_IN_PROJECT=1` in the Dockerfile. This causes the virtual environment created by Pipenv to be saved
+>>>>>>> b559ba4 (Added no-cache-dir option to pip, and pinned the version of pipenv we're using, as per the hadolint warnings)
 in a `.venv` directory inside the project directory, which is what we'll be caching and using.
 
 I suppose in this step, it's actually not necessary, since essentially each layer of the entire docker container is cached, so even if we didn't

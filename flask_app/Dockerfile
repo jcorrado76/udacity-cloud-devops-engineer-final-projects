@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY Pipfile Pipfile.lock Makefile /app/
 
-RUN pip install pipenv && pipenv install
+RUN pip install --no-cache-dir pipenv==2022.4.8 && pipenv install
 
 COPY app.py /app/
 
