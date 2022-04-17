@@ -15,4 +15,4 @@ COPY app.py /app/
 
 EXPOSE 8050
 
-CMD ["python", "app.py"]
+CMD ["pipenv", "run", "python", "app.py"]

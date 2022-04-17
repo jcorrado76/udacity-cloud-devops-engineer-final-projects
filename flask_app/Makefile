@@ -45,7 +45,7 @@ push_image:
 DOCKER_CONTAINER_NAME=udacity-devops-capstone-webapp
 DOCKER_PORT=8050
 webapp:
-	docker run --name  $(DOCKER_CONTAINER_NAME) --detach -p $(DOCKER_PORT):$(DOCKER_PORT) $(DOCKER_IMAGE)
+	docker run --name  $(DOCKER_CONTAINER_NAME) --detach --rm -p $(DOCKER_PORT):$(DOCKER_PORT) jcorrado76/$(DOCKER_IMAGE):latest
 stop_webapp:
 	docker stop $(DOCKER_CONTAINER_NAME)
 rm_container:
