@@ -28,8 +28,32 @@ The web app for this project so far is just a simple toy dash plotly dashboard.
 The GitHub repository for this codebase can be found [here](https://github.com/jcorrado76/udacity-cloud-devops-capstone)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 38c5233 (Initial commit)
 =======
+=======
+# Blue Green Deployment
+The deployment strategy for this project was to use a blue-green deployment. 
+This means, I push a new image to DockerHub, and then the kubernetes cluster tries to fill all the current pods with the new image
+immediately. If the deployment fails, I roll back to the previous image.
+
+Here is an example screenshot of the first version:
+![first_version](img/first_version.png)
+
+In this version, we have 4 possible colors for our bar plot. 
+What we're going to do in the next deployment is add a new color to the bar plot. 
+We're going to add `steelblue` as a new color.
+As far as application development goes, this only involves adding a single string to a list in the `MARKER_COLORS` list in our application code.
+
+Then, we'll re-build our docker image and deploy the new version to the kubernetes cluster. 
+# Local Development
+For local development, when I am done adding new application code, I just run:
+```bash
+make docker_image
+make webapp
+```
+To build the docker image, and then launch the app locally so I can test it out on my local browser to make sure it works. 
+>>>>>>> 6b066e4 (Added steelblue as color to the flask bar plot)
 # Creating the EKS Cluster
 1. Go into EKS, and create a cluster
 2. Create an IAM role for EKS (the EKS - Cluster use case) with the following policies:
