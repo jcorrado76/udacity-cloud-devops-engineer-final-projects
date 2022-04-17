@@ -34,9 +34,7 @@ app.layout = html.Div([
     [Input("dropdown", "value")]
 )
 def display_color(color):
-    fig = go.Figure(
-        data=go.Bar(y=[2, 3, 1], marker_color=color)
-    )
-    return fig
+    return go.Figure(data=go.Bar(y=[2, 3, 1], marker_color=color))
+
 
 app.run_server(host="0.0.0.0", port=8050, debug=True)

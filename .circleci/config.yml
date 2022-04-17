@@ -38,11 +38,11 @@ jobs:
           # this is the path to the dockerfile - the argument to -f in docker build
           path: flask_app
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: latest
+          tag: $CIRCLE_WORKFLOW_ID
       - docker/push:
           digest-path: /tmp/digest.txt
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: latest
+          tag: $CIRCLE_WORKFLOW_ID
       - run:
           command: |
             echo "Digest is: $(</tmp/digest.txt)"
@@ -107,10 +107,13 @@ jobs:
           cluster-name: << parameters.cluster-name >>
           aws-region: << parameters.aws-region >>
           install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          get-rollout-status: true
-          resource-file-path: kubernetes/flask_app.yaml
+      - kubernetes/update-container-image:
+          watch-rollout-status: true
           resource-name: deployment/flask-app-deployment
+          show-kubectl-command: true
+          container-image-updates:
+            - flask-app=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_WORKFLOW_ID
+
 
 
 workflows:
