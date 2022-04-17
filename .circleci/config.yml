@@ -114,26 +114,28 @@ jobs:
 workflows:
   default:
     jobs:
-      - lint_application:
-          filters:
-            branches:
-              only:
-                - dev
-      - lint_docker_container:
-          filters:
-            branches:
-              only:
-                - dev
+#      - lint_application:
+#          filters:
+#            branches:
+#              only:
+#                - dev
+#      - lint_docker_container:
+#          filters:
+#            branches:
+#              only:
+#                - dev
       - build_and_push_docker_image:
-          requires: [lint_docker_container]
+#          requires:
+#            - lint_docker_container
+#            - lint_application
           filters:
             branches:
               only:
                 - dev
-      - update_kubernetes_image:
-          requires: [build_and_push_docker_image]
-          cluster-name: udacity-devops-capstone
-          aws-region: us-east-1
-          context: udacity-aws
+#      - update_kubernetes_image:
+#          requires: [build_and_push_docker_image]
+#          cluster-name: udacity-devops-capstone
+#          aws-region: us-east-1
+#          context: udacity-aws
 
 
