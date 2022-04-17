@@ -111,8 +111,7 @@ jobs:
           watch-rollout-status: true
           resource-name: deployment/flask-app-deployment
           show-kubectl-command: true
-          container-image-updates:
-            - flask-app=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_WORKFLOW_ID
+          container-image-updates: flask-app=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_WORKFLOW_ID
 
 
 
