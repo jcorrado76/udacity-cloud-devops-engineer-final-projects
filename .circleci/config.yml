@@ -50,6 +50,8 @@ jobs:
   lint_application:
     docker:
       - image: cimg/python:3.10.2
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
     # you always need the combination of this working directory
     # plus the checkout path
     working_directory: ~/udacity-cloud-devops-capstone/flask_app
@@ -63,8 +65,8 @@ jobs:
             sudo chown -R circleci:circleci /usr/local/lib
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Pipfile.lock" }}
-            - v1-dependencies-
+            - v2-dependencies-{{ checksum "Pipfile.lock" }}
+            - v2-dependencies-
       - run:
           name: Install dependencies
           command: |
@@ -72,15 +74,17 @@ jobs:
             echo $(ls)
             echo $(python --version)
             pip install pipenv
-            PIPENV_VENV_IN_PROJECT=1 pipenv install
+            pipenv install
       - save_cache:
           paths:
             - ".venv"
-          key: v1-dependencies-{{ checksum "Pipfile.lock" }}
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.6/site-packages"
+          key: v2-dependencies-{{ checksum "Pipfile.lock" }}
       - run:
           name: run lint
           command: |
-            make lint
+            pipenv run "make lint"
 
   update_kubernetes_image:
     docker:
