@@ -9,7 +9,8 @@ MARKER_COLORS = [
     "MediumTurquoise",
     "LightGreen",
     "firebrick",
-    "steelblue"
+    "steelblue",
+    '#FF5733'
 ]
 
 app = dash.Dash(__name__)
