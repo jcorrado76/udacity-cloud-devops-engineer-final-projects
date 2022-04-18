@@ -56,6 +56,13 @@ Here is what the app looks like after adding the new color:
 
 And, here's what the CI/CD pipeline looked like when I ran this:
 ![CI CD Deployment](img/ci_cd_deployment.png)
+
+Here is the page with the EC2 instances that were deployed as part of the AWS Nodegroup, and were associated with the kubernetes cluster:
+![EC2 Instances](img/ec2_instances.png)
+
+Here is the screenshot where I intentionally failed the application linting stage by making the pylint 
+command more strict to get a screenshot of a failed linting step:
+![Linting Failure](img/failed_linting.png)
 # Local Development
 For local development, when I am done adding new application code, I just run:
 ```bash

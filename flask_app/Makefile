@@ -26,11 +26,11 @@ install_hadolint:
 ##### LINTING
 PYLINT_FLAGS=--disable=R,C,W1203,W1309
 APP_FILES=app.py
-#lint:
-#	python -m pylint $(PYLINT_FLAGS) $(APP_FILES)
-
 lint:
-	python -m pylint $(APP_FILES)
+	python -m pylint $(PYLINT_FLAGS) $(APP_FILES)
+
+#lint:
+#	python -m pylint $(APP_FILES)
 
 lint_dockerfile:
 	hadolint Dockerfile
