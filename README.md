@@ -29,9 +29,13 @@ The GitHub repository for this codebase can be found [here](https://github.com/j
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 38c5233 (Initial commit)
 =======
 =======
+=======
+The diagram for the build can be found at a view-only LucidChart link [here](https://lucid.app/documents/view/8ab539b0-a370-4d81-99f1-a74ef6e629bd)
+>>>>>>> 2f08c86 (Added pictures to readme)
 # Blue Green Deployment
 The deployment strategy for this project was to use a blue-green deployment. 
 This means, I push a new image to DockerHub, and then the kubernetes cluster tries to fill all the current pods with the new image
@@ -45,7 +49,13 @@ What we're going to do in the next deployment is add a new color to the bar plot
 We're going to add `steelblue` as a new color.
 As far as application development goes, this only involves adding a single string to a list in the `MARKER_COLORS` list in our application code.
 
-Then, we'll re-build our docker image and deploy the new version to the kubernetes cluster. 
+Then, we'll re-build our docker image and deploy the new version to the kubernetes cluster.
+
+Here is what the app looks like after adding the new color:
+![second_version](img/second_version.png)
+
+And, here's what the CI/CD pipeline looked like when I ran this:
+![CI CD Deployment](img/ci_cd_deployment.png)
 # Local Development
 For local development, when I am done adding new application code, I just run:
 ```bash
