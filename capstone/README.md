@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-# Udacity Cloud DevOps Engineer
-***
-## [Cloud DevOps Engineer Nanodegree Program](https://www.udacity.com/course/cloud-dev-ops-nanodegree--nd9991)
-***
-This repository is going to house all of the final projects for the courses in my Udacity Cloud DevOps Engineer Nanodegree program.
-
-Operationalize infrastructure at scale and deliver applications and services at high velocity.
-Learn to design and deploy infrastructure as code, build and monitor CI/CD pipelines for different deployment strategies, and deploy
-scalable microservices using Kubernetes.
-
-Projects:
-* [Deploy static website on AWS](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/tree/dev/static_website)
-* [Deploy a High-Availability (HA) website app on AWS using CloudFormation](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/blob/dev/highly_available_website/README.md)
-* [Give your Application Auto-Deploy Superpowers](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/blob/dev/application_auto_deploy_superpowers/README.md)
-* [Operationalize a Machine Learning Microserivce API](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/blob/dev/ml_microservices/README.md)
-* Capstone Project:
-
-Certificate:
-* 
-=======
 ## Cloud DevOps Capstone Project
 In this project, we'll develop a web application that will be deployed onto a kubernetes cluster of our choosing, and integrated with a CI/CD server.
 Finally, we'll make use of docker format containers by uploading our images to DockerHub.
@@ -27,15 +6,7 @@ The web app for this project so far is just a simple toy dash plotly dashboard.
 ## The Repository
 The GitHub repository for this codebase can be found [here](https://github.com/jcorrado76/udacity-cloud-devops-capstone)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 38c5233 (Initial commit)
-=======
-=======
-=======
 The diagram for the build can be found at a view-only LucidChart link [here](https://lucid.app/documents/view/8ab539b0-a370-4d81-99f1-a74ef6e629bd)
->>>>>>> 2f08c86 (Added pictures to readme)
 # Blue Green Deployment
 The deployment strategy for this project was to use a blue-green deployment. 
 This means, I push a new image to DockerHub, and then the kubernetes cluster tries to fill all the current pods with the new image
@@ -70,7 +41,6 @@ make docker_image
 make webapp
 ```
 To build the docker image, and then launch the app locally so I can test it out on my local browser to make sure it works. 
->>>>>>> 6b066e4 (Added steelblue as color to the flask bar plot)
 # Creating the EKS Cluster
 1. Go into EKS, and create a cluster
 2. Create an IAM role for EKS (the EKS - Cluster use case) with the following policies:
@@ -126,9 +96,6 @@ Read [this article](https://komodor.com/learn/how-to-fix-errimagepull-and-imagep
 you have an error pulling an image.
 
 They describe how to check which particular error was raised when pulling the image as well. 
-<<<<<<< HEAD
->>>>>>> f6fcdfd (Added a docker check step to CI/CD. Also updated README to contain steps for how to create EKS cluster)
-=======
 # Pipfile
 In this project, I've kept the Pipfile extremely simple. It's essentially a minimal example of a pipfile that can be used to spin up 
 a dash dashboard, and lint the python application code.
@@ -143,15 +110,7 @@ and it can probably be optimized to be smaller and have a smaller security surfa
 First, we copy our Pipfile, Pipfile.lock and Makefile into the working directory of our docker image. This will
 allow us to cache the code resulting from copying and installation of dependencies separately from updates made to the application. 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes there to be a 
->>>>>>> 8be3476 (Fixed the Dockerfile to use Pipenv)
-=======
-The next thing to note is that we've used `PIPENV_VENV_IN_PROJECT=1`. This causes the virtual environment created by Pipenv to be saved
-=======
 Note that we don't need `PIPENV_VENV_IN_PROJECT=1` in the Dockerfile. This causes the virtual environment created by Pipenv to be saved
->>>>>>> b559ba4 (Added no-cache-dir option to pip, and pinned the version of pipenv we're using, as per the hadolint warnings)
 in a `.venv` directory inside the project directory, which is what we'll be caching and using.
 
 I suppose in this step, it's actually not necessary, since essentially each layer of the entire docker container is cached, so even if we didn't
@@ -159,4 +118,3 @@ specify this environment variable, we'd still get the caching functionality if o
 Note that we need to do it this way when running our tests and whatnot since we're only using the CI/CD caching functionality when running our tests.
 This can probably be remedied by using a dedicated docker container for running our tests, and creating a base image that our testing container
 depends on, and that our final deployed image depends on.
->>>>>>> e481677 (Consolidated the two run statements into a single one where installing the python dependencies depends on the correct installation of pipenv itself.)
