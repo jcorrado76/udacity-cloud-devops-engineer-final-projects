@@ -4,7 +4,7 @@ Finally, we'll make use of docker format containers by uploading our images to D
 
 The web app for this project so far is just a simple toy dash plotly dashboard. 
 ## The Repository
-The GitHub repository for this codebase can be found [here](https://github.com/jcorrado76/udacity-cloud-devops-capstone)
+The GitHub repository for this codebase can be found [here](https://github.com/jcorrado76/udacity-cloud-devops-engineer-final-projects/blob/dev/capstone/README.md)
 
 The diagram for the build can be found at a view-only LucidChart link [here](https://lucid.app/documents/view/8ab539b0-a370-4d81-99f1-a74ef6e629bd)
 # Blue Green Deployment
